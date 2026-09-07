@@ -1,0 +1,167 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Global helper functions
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() > 0 && id.size() <= 128;
+    }
+
+    function isAdmin() {
+      return isSignedIn() && (
+        request.auth.token.email == 'bioes2007@gmail.com' ||
+        (exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+         get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'Admin')
+      );
+    }
+
+    // Default deny all
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Connection Test Document
+    match /test/{testId} {
+      allow read: if true;
+    }
+
+    // Users Collection
+    match /users/{userId} {
+      allow read: if isSignedIn();
+      allow create: if isSignedIn() && (request.auth.uid == userId || isAdmin());
+      allow update: if isSignedIn() && (
+        request.auth.uid == userId || 
+        isAdmin()
+      );
+      allow delete: if isAdmin();
+    }
+
+    // Organizations Collection
+    match /organizations/{orgId} {
+      allow read: if isSignedIn();
+      allow create, update, delete: if isSignedIn();
+    }
+
+    // Channels Collection
+    match /channels/{channelId} {
+      allow read: if isSignedIn();
+      allow create: if isSignedIn() && isValidId(channelId);
+      allow update: if isSignedIn();
+      allow delete: if isSignedIn();
+    }
+
+    // Direct Messages Collection
+    match /directMessages/{dmId} {
+      allow read: if isSignedIn();
+      allow create, update: if isSignedIn() && isValidId(dmId);
+      allow delete: if isSignedIn();
+    }
+
+    // Messages Collection
+    match /messages/{messageId} {
+      allow read: if isSignedIn();
+      allow create: if isSignedIn() && isValidId(messageId);
+      allow update, delete: if isSignedIn();
+    }
+
+    // Files Metadata Collection
+    match /files/{fileId} {
+      allow read: if isSignedIn();
+      allow create: if isSignedIn() && isValidId(fileId);
+      allow update, delete: if isSignedIn();
+    }
+
+    // File Folders Collection
+    match /fileFolders/{folderId} {
+      allow read: if isSignedIn();
+      allow create, update, delete: if isSignedIn();
+    }
+
+    // Official Government Emails Collection
+    match /emails/{emailId} {
+      allow read: if isSignedIn();
+      allow create: if isSignedIn() && isValidId(emailId);
+      allow update, delete: if isSignedIn();
+    }
+
+    // Project Deliverables & Tasks Collection
+    match /tasks/{taskId} {
+      allow read: if isSignedIn();
+      allow create: if isSignedIn() && isValidId(taskId);
+      allow update, delete: if isSignedIn();
+    }
+
+    // Notifications Collection
+    match /notifications/{notificationId} {
+      allow read: if isSignedIn();
+      allow create: if isSignedIn() && isValidId(notificationId);
+      allow update, delete: if isSignedIn();
+    }
+
+    // Statutory Audit Logs Collection
+    match /auditLogs/{auditId} {
+      allow read: if isSignedIn();
+      allow create: if isSignedIn() && isValidId(auditId);
+      allow update, delete: if isAdmin();
+    }
+
+    // Approved Domains Allowlist
+    match /approvedDomains/{domainId} {
+      allow read: if true; // Publicly verifiable for registration checks
+      allow write: if isSignedIn();
+    }
+
+    // Invitations
+    match /invitations/{invitationId} {
+      allow read: if true;
+      allow write: if isSignedIn();
+    }
+
+    // Events / Calendar Events
+    match /events/{eventId} {
+      allow read: if isSignedIn();
+      allow write: if isSignedIn();
+    }
+
+    match /calendarEvents/{eventId} {
+      allow read: if isSignedIn();
+      allow create: if isSignedIn() && isValidId(eventId);
+      allow update, delete: if isSignedIn();
+    }
+
+    // Video Meetings & Rooms
+    match /meetings/{meetingId} {
+      allow read: if isSignedIn();
+      allow create: if isSignedIn() && isValidId(meetingId);
+      allow update, delete: if isSignedIn();
+    }
+
+    // Meeting Participants state in rooms
+    match /meetingParticipants/{participantId} {
+      allow read: if isSignedIn();
+      allow create, update, delete: if isSignedIn();
+    }
+
+    // Real-time WebRTC Signaling collection
+    match /meetingSignals/{signalId} {
+      allow read: if isSignedIn();
+      allow create: if isSignedIn();
+      allow update, delete: if isSignedIn();
+    }
+
+    // Lightweight In-meeting Chat messages
+    match /meetingChat/{messageId} {
+      allow read: if isSignedIn();
+      allow create: if isSignedIn() && isValidId(messageId);
+      allow update, delete: if isSignedIn();
+    }
+  }
+}

@@ -1,0 +1,17 @@
+{
+  "name": "WorkNest - Project-Centric Digital Workspace",
+  "short_name": "WorkNest",
+  "description": "WorkNest is the unified digital workplace platform for organizational communication, channels, real-time messaging, official documents, and team coordination.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0B101E",
+  "theme_color": "#0062FF",
+  "orientation": "any",
+  "icons": [
+    {
+      "src": "/assets/branding/worknest-logo.png",
+      "sizes": "192x192 512x512 1024x1024",
+      "type": "image/png"
+    }
+  ]
+}
