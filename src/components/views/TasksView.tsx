@@ -1064,31 +1064,31 @@ export const TasksView: React.FC<TasksViewProps> = ({
 
       {/* 3. Task Detail Modal */}
       {selectedTaskDetail && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-black/60 backdrop-blur-xs animate-fade-in">
-          <div className="w-full max-w-2xl bg-white dark:bg-[#0F172A] rounded-2xl border border-stone-200 dark:border-stone-800 shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 md:p-8 bg-black/60 backdrop-blur-xs overflow-y-auto animate-fade-in">
+          <div className="w-full max-w-2xl bg-white dark:bg-[#111726] rounded-2xl sm:rounded-3xl border border-stone-200 dark:border-stone-800 shadow-2xl overflow-hidden flex flex-col max-h-[88vh] my-6 animate-scale-in">
             
             {/* Modal Header */}
-            <div className="p-4 sm:p-5 border-b border-stone-200 dark:border-stone-800 bg-stone-50/70 dark:bg-stone-900/50 flex items-center justify-between">
-              <div className="flex items-center space-x-2.5 min-w-0">
-                <div className="w-8 h-8 rounded-xl bg-blue-100 dark:bg-blue-950 text-[#0062FF] dark:text-blue-400 flex items-center justify-center font-bold">
-                  <FolderKanban className="w-4 h-4" />
+            <div className="px-6 sm:px-8 py-5 sm:py-6 border-b border-stone-100 dark:border-stone-800/80 bg-stone-50/70 dark:bg-stone-900/60 flex items-center justify-between shrink-0">
+              <div className="flex items-center space-x-3.5 min-w-0 pr-4">
+                <div className="w-10 h-10 rounded-xl sm:rounded-2xl bg-blue-50 dark:bg-blue-950/60 text-[#0062FF] dark:text-blue-400 flex items-center justify-center shrink-0 border border-blue-100 dark:border-blue-900/40 shadow-xs">
+                  <FolderKanban className="w-5 h-5" />
                 </div>
                 <div className="min-w-0">
-                  <span className="text-[10px] font-mono uppercase text-stone-400">Task Deliverable</span>
-                  <h3 className="text-sm sm:text-base font-bold text-stone-900 dark:text-white truncate">
+                  <span className="text-xs font-bold uppercase tracking-wider text-stone-500 dark:text-stone-400 block">Task Deliverable</span>
+                  <h3 className="text-base sm:text-lg font-bold text-stone-900 dark:text-stone-100 truncate">
                     {selectedTaskDetail.title}
                   </h3>
                 </div>
               </div>
 
-              <div className="flex items-center space-x-2">
+              <div className="flex items-center space-x-2 shrink-0">
                 <button
                   type="button"
                   onClick={() => {
                     handleOpenEditModal(selectedTaskDetail);
                     setSelectedTaskDetail(null);
                   }}
-                  className="p-1.5 rounded-lg border border-stone-200 dark:border-stone-700 hover:bg-stone-100 dark:hover:bg-stone-800 text-stone-600 dark:text-stone-300 text-xs font-semibold flex items-center space-x-1 cursor-pointer"
+                  className="px-3.5 py-2 rounded-xl border border-stone-200 dark:border-stone-700 hover:bg-stone-100 dark:hover:bg-stone-800 text-stone-700 dark:text-stone-300 text-xs font-semibold flex items-center space-x-1.5 cursor-pointer transition-colors"
                 >
                   <Edit3 className="w-3.5 h-3.5" />
                   <span>Edit</span>
@@ -1096,7 +1096,7 @@ export const TasksView: React.FC<TasksViewProps> = ({
                 <button
                   type="button"
                   onClick={() => setSelectedTaskDetail(null)}
-                  className="p-1.5 rounded-lg text-stone-400 hover:text-stone-700 dark:hover:text-stone-200 hover:bg-stone-100 dark:hover:bg-stone-800 cursor-pointer"
+                  className="p-2 rounded-xl text-stone-400 hover:text-stone-700 dark:hover:text-stone-200 hover:bg-stone-100 dark:hover:bg-stone-800 cursor-pointer transition-colors"
                 >
                   <X className="w-5 h-5" />
                 </button>
@@ -1104,13 +1104,13 @@ export const TasksView: React.FC<TasksViewProps> = ({
             </div>
 
             {/* Modal Body */}
-            <div className="p-4 sm:p-6 overflow-y-auto space-y-5 text-xs">
+            <div className="px-6 sm:px-8 py-6 overflow-y-auto space-y-6 text-sm flex-1">
               
               {/* Status and Priority Badges */}
-              <div className="flex flex-wrap items-center justify-between gap-3 p-3 rounded-xl bg-stone-50 dark:bg-stone-900/60 border border-stone-200/80 dark:border-stone-800/80">
-                <div className="flex items-center space-x-3">
-                  <div className="space-y-0.5">
-                    <span className="text-[10px] text-stone-400 uppercase font-bold">Stage</span>
+              <div className="flex flex-wrap items-center justify-between gap-4 p-4 rounded-2xl bg-stone-50/70 dark:bg-stone-900/50 border border-stone-200/70 dark:border-stone-800/70">
+                <div className="flex items-center space-x-4">
+                  <div className="space-y-1">
+                    <span className="text-xs text-stone-400 uppercase font-bold block">Stage</span>
                     <div>
                       <select
                         value={selectedTaskDetail.status}
@@ -1119,7 +1119,7 @@ export const TasksView: React.FC<TasksViewProps> = ({
                           await onUpdateTaskStatus(selectedTaskDetail.id, newStatus);
                           setSelectedTaskDetail({ ...selectedTaskDetail, status: newStatus });
                         }}
-                        className="px-2.5 py-1 rounded-lg border border-stone-300 dark:border-stone-700 bg-white dark:bg-stone-800 font-bold text-xs cursor-pointer"
+                        className="px-3 py-1.5 rounded-xl border border-stone-300 dark:border-stone-700 bg-white dark:bg-stone-800 font-bold text-xs cursor-pointer shadow-2xs"
                       >
                         <option value="todo">Backlog & Assigned</option>
                         <option value="in_progress">In Deliberation & Active</option>
@@ -1129,42 +1129,44 @@ export const TasksView: React.FC<TasksViewProps> = ({
                     </div>
                   </div>
 
-                  <div className="space-y-0.5">
-                    <span className="text-[10px] text-stone-400 uppercase font-bold">Priority</span>
+                  <div className="space-y-1">
+                    <span className="text-xs text-stone-400 uppercase font-bold block">Priority</span>
                     <div>
                       {getPriorityBadge(selectedTaskDetail.priority)}
                     </div>
                   </div>
                 </div>
 
-                <div className="space-y-0.5 text-right">
-                  <span className="text-[10px] text-stone-400 uppercase font-bold">Due Date</span>
-                  <div className="flex items-center space-x-1.5 font-bold text-stone-800 dark:text-stone-200">
-                    <Calendar className="w-3.5 h-3.5 text-[#0062FF]" />
+                <div className="space-y-1 text-right">
+                  <span className="text-xs text-stone-400 uppercase font-bold block">Fulfillment Target</span>
+                  <div className="flex items-center space-x-2 font-bold text-stone-800 dark:text-stone-200 text-sm">
+                    <Calendar className="w-4 h-4 text-[#0062FF]" />
                     <span>{selectedTaskDetail.dueDate} ({selectedTaskDetail.dueTime || '17:00'})</span>
                   </div>
                 </div>
               </div>
 
               {/* Description */}
-              <div className="space-y-1.5">
-                <h4 className="font-bold text-stone-700 dark:text-stone-300 uppercase text-[11px] tracking-wider">
+              <div className="space-y-2">
+                <h4 className="font-bold text-stone-600 dark:text-stone-400 uppercase text-xs tracking-wider">
                   Scope & Directives
                 </h4>
-                <p className="text-stone-600 dark:text-stone-300 leading-relaxed whitespace-pre-wrap bg-stone-50 dark:bg-stone-900/40 p-3.5 rounded-xl border border-stone-200/60 dark:border-stone-800/60">
+                <p className="text-stone-700 dark:text-stone-300 leading-relaxed whitespace-pre-wrap bg-stone-50/50 dark:bg-stone-900/40 p-4 rounded-2xl border border-stone-200/60 dark:border-stone-800/60 text-sm">
                   {selectedTaskDetail.description || 'No specific directive scope provided.'}
                 </p>
               </div>
 
               {/* Deliverable info */}
               {selectedTaskDetail.deliverableTitle && (
-                <div className="space-y-1.5">
-                  <h4 className="font-bold text-stone-700 dark:text-stone-300 uppercase text-[11px] tracking-wider">
+                <div className="space-y-2">
+                  <h4 className="font-bold text-stone-600 dark:text-stone-400 uppercase text-xs tracking-wider">
                     Associated Project Deliverable
                   </h4>
-                  <div className="p-3 rounded-xl bg-blue-50/60 dark:bg-blue-950/40 border border-blue-200 dark:border-blue-900 flex items-center justify-between">
-                    <div className="flex items-center space-x-2">
-                      <Briefcase className="w-4 h-4 text-[#0062FF]" />
+                  <div className="p-4 rounded-2xl bg-blue-50/60 dark:bg-blue-950/40 border border-blue-200 dark:border-blue-900 flex items-center justify-between">
+                    <div className="flex items-center space-x-3">
+                      <div className="w-8 h-8 rounded-lg bg-[#0062FF] text-white flex items-center justify-center">
+                        <Briefcase className="w-4 h-4" />
+                      </div>
                       <span className="font-bold text-stone-900 dark:text-stone-100">{selectedTaskDetail.deliverableTitle}</span>
                     </div>
                   </div>
@@ -1172,66 +1174,68 @@ export const TasksView: React.FC<TasksViewProps> = ({
               )}
 
               {/* Assignees */}
-              <div className="space-y-2">
-                <h4 className="font-bold text-stone-700 dark:text-stone-300 uppercase text-[11px] tracking-wider">
+              <div className="space-y-3">
+                <h4 className="font-bold text-stone-600 dark:text-stone-400 uppercase text-xs tracking-wider">
                   Assigned Personnel ({selectedTaskDetail.assigneeIds?.length || 0})
                 </h4>
-                <div className="flex flex-wrap gap-2">
+                <div className="flex flex-wrap gap-2.5">
                   {members
                     .filter(m => selectedTaskDetail.assigneeIds?.includes(m.id))
                     .map(m => (
-                      <div key={m.id} className="flex items-center space-x-2 px-3 py-1.5 rounded-xl bg-stone-100 dark:bg-stone-800/80 border border-stone-200 dark:border-stone-700">
+                      <div key={m.id} className="flex items-center space-x-2.5 px-3.5 py-2 rounded-xl bg-stone-100/80 dark:bg-stone-800/80 border border-stone-200 dark:border-stone-700">
                         <UserAvatar member={m} size="xs" />
                         <div>
-                          <div className="font-bold text-stone-900 dark:text-stone-100">{m.name}</div>
-                          <div className="text-[10px] text-stone-400">{m.role} • {m.department}</div>
+                          <div className="font-bold text-stone-900 dark:text-stone-100 text-xs">{m.name}</div>
+                          <div className="text-[11px] text-stone-400">{m.role} • {m.department}</div>
                         </div>
                       </div>
                     ))}
                   {(!selectedTaskDetail.assigneeIds || selectedTaskDetail.assigneeIds.length === 0) && (
-                    <span className="text-stone-400 italic">No assigned personnel yet.</span>
+                    <span className="text-stone-400 italic text-sm">No assigned personnel yet.</span>
                   )}
                 </div>
               </div>
 
               {/* Checklist verification items */}
-              <div className="space-y-2">
-                <h4 className="font-bold text-stone-700 dark:text-stone-300 uppercase text-[11px] tracking-wider flex items-center justify-between">
-                  <span>Verification Checklist</span>
-                  <span className="text-stone-400 font-normal">
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <h4 className="font-bold text-stone-600 dark:text-stone-400 uppercase text-xs tracking-wider">
+                    Verification Checklist
+                  </h4>
+                  <span className="text-xs font-semibold text-stone-500">
                     {selectedTaskDetail.checklist?.filter(c => c.completed).length || 0}/{selectedTaskDetail.checklist?.length || 0} completed
                   </span>
-                </h4>
+                </div>
 
-                <div className="space-y-1.5">
+                <div className="space-y-2">
                   {(selectedTaskDetail.checklist || []).map(item => (
                     <button
                       key={item.id}
                       type="button"
                       onClick={() => handleToggleChecklist(selectedTaskDetail, item.id)}
-                      className={`w-full flex items-center space-x-2.5 p-2.5 rounded-xl border text-left transition-all cursor-pointer ${
+                      className={`w-full flex items-center space-x-3 p-3.5 rounded-xl sm:rounded-2xl border text-left transition-all cursor-pointer ${
                         item.completed 
                           ? 'bg-emerald-50/50 dark:bg-emerald-950/20 border-emerald-200 dark:border-emerald-900/50 text-stone-500 dark:text-stone-400 line-through' 
-                          : 'bg-white dark:bg-stone-800 border-stone-200 dark:border-stone-700 text-stone-800 dark:text-stone-200'
+                          : 'bg-white dark:bg-stone-800/80 border-stone-200 dark:border-stone-700 text-stone-800 dark:text-stone-200 hover:border-stone-300'
                       }`}
                     >
                       {item.completed ? (
-                        <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+                        <CheckCircle2 className="w-5 h-5 text-emerald-600 shrink-0" />
                       ) : (
-                        <Square className="w-4 h-4 text-stone-400 shrink-0" />
+                        <Square className="w-5 h-5 text-stone-400 shrink-0" />
                       )}
-                      <span className="flex-1 font-medium">{item.text}</span>
+                      <span className="flex-1 font-medium text-sm">{item.text}</span>
                     </button>
                   ))}
 
                   {(!selectedTaskDetail.checklist || selectedTaskDetail.checklist.length === 0) && (
-                    <p className="text-stone-400 italic">No checklist items specified.</p>
+                    <p className="text-stone-400 italic text-sm">No checklist items specified.</p>
                   )}
                 </div>
               </div>
 
               {/* Quick Actions (Email Memo / Channel) */}
-              <div className="pt-2 border-t border-stone-200 dark:border-stone-800 flex flex-wrap items-center gap-2">
+              <div className="pt-3 border-t border-stone-200 dark:border-stone-800 flex flex-wrap items-center gap-3">
                 {onOpenComposeEmail && (
                   <button
                     type="button"
@@ -1242,9 +1246,9 @@ export const TasksView: React.FC<TasksViewProps> = ({
                       );
                       setSelectedTaskDetail(null);
                     }}
-                    className="flex items-center space-x-1.5 px-3 py-2 rounded-xl bg-stone-100 dark:bg-stone-800 hover:bg-stone-200 text-stone-700 dark:text-stone-300 font-semibold cursor-pointer transition-colors"
+                    className="flex items-center space-x-2 px-4 py-2.5 rounded-xl bg-stone-100 dark:bg-stone-800 hover:bg-stone-200 dark:hover:bg-stone-700 text-stone-700 dark:text-stone-300 font-semibold cursor-pointer transition-colors text-xs"
                   >
-                    <Mail className="w-3.5 h-3.5" />
+                    <Mail className="w-4 h-4" />
                     <span>Dispatch Email Memo</span>
                   </button>
                 )}
@@ -1255,9 +1259,9 @@ export const TasksView: React.FC<TasksViewProps> = ({
                       onNavigateToChannel(selectedTaskDetail.channelId!);
                       setSelectedTaskDetail(null);
                     }}
-                    className="flex items-center space-x-1.5 px-3 py-2 rounded-xl bg-blue-50 dark:bg-blue-950 hover:bg-blue-100 text-[#0062FF] dark:text-blue-300 font-semibold cursor-pointer transition-colors"
+                    className="flex items-center space-x-2 px-4 py-2.5 rounded-xl bg-blue-50 dark:bg-blue-950/60 hover:bg-blue-100 text-[#0062FF] dark:text-blue-300 font-semibold cursor-pointer transition-colors text-xs"
                   >
-                    <MessageSquare className="w-3.5 h-3.5" />
+                    <MessageSquare className="w-4 h-4" />
                     <span>Discuss in #{selectedTaskDetail.channelName || 'Council'}</span>
                   </button>
                 )}
@@ -1266,14 +1270,14 @@ export const TasksView: React.FC<TasksViewProps> = ({
             </div>
 
             {/* Modal Footer */}
-            <div className="p-4 border-t border-stone-200 dark:border-stone-800 bg-stone-50/50 dark:bg-stone-900/50 flex items-center justify-between">
+            <div className="px-6 sm:px-8 py-4 sm:py-5 border-t border-stone-100 dark:border-stone-800/80 bg-stone-50/50 dark:bg-stone-900/40 flex items-center justify-between shrink-0">
               <button
                 type="button"
                 onClick={async () => {
                   await onDeleteTask(selectedTaskDetail.id);
                   setSelectedTaskDetail(null);
                 }}
-                className="px-3 py-1.5 rounded-xl text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/40 text-xs font-semibold cursor-pointer transition-colors"
+                className="px-4 py-2 rounded-xl text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/40 text-xs font-semibold cursor-pointer transition-colors"
               >
                 Delete Deliverable
               </button>
@@ -1281,7 +1285,7 @@ export const TasksView: React.FC<TasksViewProps> = ({
               <button
                 type="button"
                 onClick={() => setSelectedTaskDetail(null)}
-                className="px-4 py-1.5 rounded-xl bg-stone-900 hover:bg-stone-800 dark:bg-white dark:hover:bg-stone-200 text-white dark:text-stone-900 text-xs font-bold shadow-xs cursor-pointer"
+                className="px-6 py-2.5 rounded-xl bg-stone-900 hover:bg-stone-800 dark:bg-white dark:hover:bg-stone-200 text-white dark:text-stone-900 text-xs font-bold shadow-xs cursor-pointer transition-colors"
               >
                 Close
               </button>
@@ -1293,19 +1297,20 @@ export const TasksView: React.FC<TasksViewProps> = ({
 
       {/* 4. Create / Edit Task Modal */}
       {isCreateModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-black/60 backdrop-blur-xs animate-fade-in">
-          <div className="w-full max-w-xl bg-white dark:bg-[#0F172A] rounded-2xl border border-stone-200 dark:border-stone-800 shadow-2xl overflow-hidden flex flex-col max-h-[92vh]">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 md:p-8 bg-black/60 backdrop-blur-xs overflow-y-auto animate-fade-in">
+          <div className="w-full max-w-2xl bg-white dark:bg-[#111726] rounded-2xl sm:rounded-3xl border border-stone-200 dark:border-stone-800 shadow-2xl overflow-hidden flex flex-col max-h-[90vh] my-6 animate-scale-in">
             
-            <div className="p-4 sm:p-5 border-b border-stone-200 dark:border-stone-800 bg-stone-50/70 dark:bg-stone-900/50 flex items-center justify-between">
-              <div className="flex items-center space-x-2.5">
-                <div className="w-8 h-8 rounded-xl bg-[#0062FF] text-white flex items-center justify-center font-bold shadow-xs">
-                  <Plus className="w-4 h-4" />
+            {/* Header */}
+            <div className="px-6 sm:px-8 py-5 sm:py-6 border-b border-stone-100 dark:border-stone-800/80 bg-stone-50/70 dark:bg-stone-900/60 flex items-center justify-between shrink-0">
+              <div className="flex items-center space-x-3.5">
+                <div className="w-10 h-10 rounded-xl sm:rounded-2xl bg-blue-50 dark:bg-blue-950/60 text-[#0062FF] dark:text-blue-400 flex items-center justify-center shrink-0 border border-blue-100 dark:border-blue-900/40 shadow-xs">
+                  <Plus className="w-5 h-5" />
                 </div>
                 <div>
-                  <h3 className="text-sm sm:text-base font-bold text-stone-900 dark:text-white">
-                    {editingTask ? 'Edit Task Deliverable' : 'Create Project Deliverable Task'}
+                  <h3 className="text-base sm:text-lg font-bold text-stone-900 dark:text-stone-100">
+                    {editingTask ? 'Edit Task Deliverable' : 'Create Task Deliverable'}
                   </h3>
-                  <p className="text-[11px] text-stone-500 dark:text-stone-400">
+                  <p className="text-xs text-stone-500 dark:text-stone-400 mt-0.5">
                     Assign statutory responsibilities and target fulfillment deadlines.
                   </p>
                 </div>
@@ -1317,253 +1322,256 @@ export const TasksView: React.FC<TasksViewProps> = ({
                   setIsCreateModalOpen(false);
                   setEditingTask(null);
                 }}
-                className="p-1.5 rounded-lg text-stone-400 hover:text-stone-700 dark:hover:text-stone-200 hover:bg-stone-100 dark:hover:bg-stone-800 cursor-pointer"
+                className="p-2 rounded-xl text-stone-400 hover:text-stone-700 dark:hover:text-stone-200 hover:bg-stone-100 dark:hover:bg-stone-800 cursor-pointer transition-colors"
               >
                 <X className="w-5 h-5" />
               </button>
             </div>
 
             {/* Form */}
-            <form onSubmit={handleSaveTask} className="p-4 sm:p-6 overflow-y-auto space-y-4 text-xs">
-              
-              {/* Task Title */}
-              <div className="space-y-1.5">
-                <label className="font-bold text-stone-700 dark:text-stone-300">
-                  Task Title <span className="text-rose-500">*</span>
-                </label>
-                <input
-                  type="text"
-                  required
-                  placeholder="e.g. Finalize NDPA 2023 Cross-Border Cloud Compliance Filing"
-                  value={formTitle}
-                  onChange={(e) => setFormTitle(e.target.value)}
-                  className="w-full px-3 py-2 rounded-xl border border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-900 text-stone-900 dark:text-stone-100 focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-[#0062FF]"
-                />
-              </div>
-
-              {/* Description */}
-              <div className="space-y-1.5">
-                <label className="font-bold text-stone-700 dark:text-stone-300">
-                  Deliverable Scope & Directives
-                </label>
-                <textarea
-                  rows={3}
-                  placeholder="Detailed breakdown of requirements, statutory references, and expected outcomes..."
-                  value={formDescription}
-                  onChange={(e) => setFormDescription(e.target.value)}
-                  className="w-full px-3 py-2 rounded-xl border border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-900 text-stone-900 dark:text-stone-100 focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-[#0062FF]"
-                />
-              </div>
-
-              {/* Associated Deliverable */}
-              <div className="space-y-1.5">
-                <label className="font-bold text-stone-700 dark:text-stone-300">
-                  Project Deliverable Program
-                </label>
-                <select
-                  value={formDeliverableId}
-                  onChange={(e) => setFormDeliverableId(e.target.value)}
-                  className="w-full px-3 py-2 rounded-xl border border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-900 text-stone-900 dark:text-stone-100 focus:outline-none cursor-pointer"
-                >
-                  <option value="">-- General Operational Deliverable --</option>
-                  {effectiveDeliverables.map(del => (
-                    <option key={del.id} value={del.id}>
-                      [{del.code}] {del.title} ({del.department || 'General'})
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              {/* Stage & Priority Grid */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <div className="space-y-1.5">
-                  <label className="font-bold text-stone-700 dark:text-stone-300">
-                    Initial Stage
-                  </label>
-                  <select
-                    value={formStatus}
-                    onChange={(e) => setFormStatus(e.target.value as TaskStatus)}
-                    className="w-full px-3 py-2 rounded-xl border border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-900 text-stone-900 dark:text-stone-100 focus:outline-none cursor-pointer font-medium"
-                  >
-                    <option value="todo">Backlog & Assigned</option>
-                    <option value="in_progress">In Deliberation & Active</option>
-                    <option value="review">Statutory Review</option>
-                    <option value="done">Delivered & Dispatched</option>
-                  </select>
-                </div>
-
-                <div className="space-y-1.5">
-                  <label className="font-bold text-stone-700 dark:text-stone-300">
-                    Priority Level
-                  </label>
-                  <select
-                    value={formPriority}
-                    onChange={(e) => setFormPriority(e.target.value as TaskPriority)}
-                    className="w-full px-3 py-2 rounded-xl border border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-900 text-stone-900 dark:text-stone-100 focus:outline-none cursor-pointer font-medium"
-                  >
-                    <option value="urgent">Urgent (Immediate Mandate)</option>
-                    <option value="high">High Priority</option>
-                    <option value="medium">Medium Priority</option>
-                    <option value="low">Low (Standard Cadence)</option>
-                  </select>
-                </div>
-              </div>
-
-              {/* Due Date & Time */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <div className="space-y-1.5">
-                  <label className="font-bold text-stone-700 dark:text-stone-300">
-                    Due Date <span className="text-rose-500">*</span>
-                  </label>
-                  <input
-                    type="date"
-                    required
-                    value={formDueDate}
-                    onChange={(e) => setFormDueDate(e.target.value)}
-                    className="w-full px-3 py-2 rounded-xl border border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-900 text-stone-900 dark:text-stone-100 focus:outline-none"
-                  />
-                </div>
-
-                <div className="space-y-1.5">
-                  <label className="font-bold text-stone-700 dark:text-stone-300">
-                    Target Time
-                  </label>
-                  <input
-                    type="time"
-                    value={formDueTime}
-                    onChange={(e) => setFormDueTime(e.target.value)}
-                    className="w-full px-3 py-2 rounded-xl border border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-900 text-stone-900 dark:text-stone-100 focus:outline-none"
-                  />
-                </div>
-              </div>
-
-              {/* Assignees Selector */}
-              <div className="space-y-1.5">
-                <label className="font-bold text-stone-700 dark:text-stone-300">
-                  Assign Personnel
-                </label>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 max-h-40 overflow-y-auto p-2 rounded-xl border border-stone-200 dark:border-stone-700 bg-stone-50/50 dark:bg-stone-900/50">
-                  {members.map(member => {
-                    const isSelected = formAssigneeIds.includes(member.id);
-                    return (
-                      <button
-                        key={member.id}
-                        type="button"
-                        onClick={() => {
-                          if (isSelected) {
-                            setFormAssigneeIds(prev => prev.filter(id => id !== member.id));
-                          } else {
-                            setFormAssigneeIds(prev => [...prev, member.id]);
-                          }
-                        }}
-                        className={`flex items-center space-x-2 p-1.5 rounded-lg text-left transition-colors cursor-pointer ${
-                          isSelected 
-                            ? 'bg-blue-100 dark:bg-blue-950 text-[#0062FF] dark:text-blue-300 font-bold' 
-                            : 'hover:bg-stone-100 dark:hover:bg-stone-800 text-stone-700 dark:text-stone-300'
-                        }`}
-                      >
-                        <UserAvatar member={member} size="xs" />
-                        <span className="truncate text-[11px]">{member.name}</span>
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-
-              {/* Tags */}
-              <div className="space-y-1.5">
-                <label className="font-bold text-stone-700 dark:text-stone-300">
-                  Tags (comma separated)
-                </label>
-                <input
-                  type="text"
-                  placeholder="e.g. Statutory, NDPA 2023, Treasury, Urgent"
-                  value={formTags}
-                  onChange={(e) => setFormTags(e.target.value)}
-                  className="w-full px-3 py-2 rounded-xl border border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-900 text-stone-900 dark:text-stone-100 focus:outline-none"
-                />
-              </div>
-
-              {/* Checklist Builder */}
-              <div className="space-y-2 pt-2 border-t border-stone-200 dark:border-stone-800">
-                <label className="font-bold text-stone-700 dark:text-stone-300">
-                  Verification Checklist Items
-                </label>
+            <form onSubmit={handleSaveTask} className="flex flex-col flex-1 min-h-0 overflow-hidden">
+              <div className="px-6 sm:px-8 py-6 overflow-y-auto space-y-6 text-sm flex-1">
                 
-                <div className="space-y-1.5">
-                  {formChecklist.map((item, idx) => (
-                    <div key={item.id} className="flex items-center space-x-2">
-                      <span className="w-5 text-center text-stone-400 font-mono text-[10px]">{idx + 1}.</span>
+                {/* Task Title */}
+                <div>
+                  <label className="text-xs font-bold uppercase tracking-wider text-stone-600 dark:text-stone-400 block mb-2">
+                    Task Title <span className="text-rose-500">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    placeholder="e.g. Finalize Cross-Border Cloud Compliance Filing"
+                    value={formTitle}
+                    onChange={(e) => setFormTitle(e.target.value)}
+                    className="w-full px-4 py-3 rounded-xl sm:rounded-2xl border border-stone-200 dark:border-stone-700/80 bg-stone-50/50 dark:bg-stone-900/50 text-stone-900 dark:text-stone-100 focus:outline-none focus:ring-2 focus:ring-[#0062FF]/20 focus:border-[#0062FF] font-semibold text-sm transition-all"
+                  />
+                </div>
+
+                {/* Description */}
+                <div>
+                  <label className="text-xs font-bold uppercase tracking-wider text-stone-600 dark:text-stone-400 block mb-2">
+                    Deliverable Scope & Directives
+                  </label>
+                  <textarea
+                    rows={3}
+                    placeholder="Detailed breakdown of requirements, statutory references, and expected outcomes..."
+                    value={formDescription}
+                    onChange={(e) => setFormDescription(e.target.value)}
+                    className="w-full px-4 py-3 rounded-xl sm:rounded-2xl border border-stone-200 dark:border-stone-700/80 bg-stone-50/50 dark:bg-stone-900/50 text-stone-900 dark:text-stone-100 focus:outline-none focus:ring-2 focus:ring-[#0062FF]/20 focus:border-[#0062FF] text-sm resize-none leading-relaxed transition-all"
+                  />
+                </div>
+
+                {/* Associated Deliverable */}
+                <div>
+                  <label className="text-xs font-bold uppercase tracking-wider text-stone-600 dark:text-stone-400 block mb-2">
+                    Project Deliverable Program
+                  </label>
+                  <select
+                    value={formDeliverableId}
+                    onChange={(e) => setFormDeliverableId(e.target.value)}
+                    className="w-full px-4 py-2.5 rounded-xl border border-stone-200 dark:border-stone-700/80 bg-stone-50/50 dark:bg-stone-900/50 text-stone-900 dark:text-stone-100 focus:outline-none cursor-pointer text-sm"
+                  >
+                    <option value="">-- General Operational Deliverable --</option>
+                    {effectiveDeliverables.map(del => (
+                      <option key={del.id} value={del.id}>
+                        [{del.code}] {del.title} ({del.department || 'General'})
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                {/* Stage & Priority Grid */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <label className="text-xs font-bold uppercase tracking-wider text-stone-600 dark:text-stone-400 block mb-2">
+                      Initial Stage
+                    </label>
+                    <select
+                      value={formStatus}
+                      onChange={(e) => setFormStatus(e.target.value as TaskStatus)}
+                      className="w-full px-4 py-2.5 rounded-xl border border-stone-200 dark:border-stone-700/80 bg-stone-50/50 dark:bg-stone-900/50 text-stone-900 dark:text-stone-100 focus:outline-none cursor-pointer font-medium text-sm"
+                    >
+                      <option value="todo">Backlog & Assigned</option>
+                      <option value="in_progress">In Deliberation & Active</option>
+                      <option value="review">Statutory Review</option>
+                      <option value="done">Delivered & Dispatched</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="text-xs font-bold uppercase tracking-wider text-stone-600 dark:text-stone-400 block mb-2">
+                      Priority Level
+                    </label>
+                    <select
+                      value={formPriority}
+                      onChange={(e) => setFormPriority(e.target.value as TaskPriority)}
+                      className="w-full px-4 py-2.5 rounded-xl border border-stone-200 dark:border-stone-700/80 bg-stone-50/50 dark:bg-stone-900/50 text-stone-900 dark:text-stone-100 focus:outline-none cursor-pointer font-medium text-sm"
+                    >
+                      <option value="urgent">Urgent (Immediate Mandate)</option>
+                      <option value="high">High Priority</option>
+                      <option value="medium">Medium Priority</option>
+                      <option value="low">Low (Standard Cadence)</option>
+                    </select>
+                  </div>
+                </div>
+
+                {/* Due Date & Time */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <label className="text-xs font-bold uppercase tracking-wider text-stone-600 dark:text-stone-400 block mb-2">
+                      Due Date <span className="text-rose-500">*</span>
+                    </label>
+                    <input
+                      type="date"
+                      required
+                      value={formDueDate}
+                      onChange={(e) => setFormDueDate(e.target.value)}
+                      className="w-full px-4 py-2.5 rounded-xl border border-stone-200 dark:border-stone-700/80 bg-stone-50/50 dark:bg-stone-900/50 text-stone-900 dark:text-stone-100 focus:outline-none text-sm"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="text-xs font-bold uppercase tracking-wider text-stone-600 dark:text-stone-400 block mb-2">
+                      Target Time
+                    </label>
+                    <input
+                      type="time"
+                      value={formDueTime}
+                      onChange={(e) => setFormDueTime(e.target.value)}
+                      className="w-full px-4 py-2.5 rounded-xl border border-stone-200 dark:border-stone-700/80 bg-stone-50/50 dark:bg-stone-900/50 text-stone-900 dark:text-stone-100 focus:outline-none text-sm"
+                    />
+                  </div>
+                </div>
+
+                {/* Assignees Selector */}
+                <div>
+                  <label className="text-xs font-bold uppercase tracking-wider text-stone-600 dark:text-stone-400 block mb-2">
+                    Assign Personnel
+                  </label>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 max-h-44 overflow-y-auto p-3 rounded-2xl border border-stone-200 dark:border-stone-700/80 bg-stone-50/50 dark:bg-stone-900/50 scrollbar-thin">
+                    {members.map(member => {
+                      const isSelected = formAssigneeIds.includes(member.id);
+                      return (
+                        <button
+                          key={member.id}
+                          type="button"
+                          onClick={() => {
+                            if (isSelected) {
+                              setFormAssigneeIds(prev => prev.filter(id => id !== member.id));
+                            } else {
+                              setFormAssigneeIds(prev => [...prev, member.id]);
+                            }
+                          }}
+                          className={`flex items-center space-x-2.5 p-2 rounded-xl text-left transition-colors cursor-pointer ${
+                            isSelected 
+                              ? 'bg-blue-50 dark:bg-blue-950/60 text-[#0062FF] dark:text-blue-300 font-bold border border-blue-200 dark:border-blue-900/60' 
+                              : 'hover:bg-stone-100 dark:hover:bg-stone-800 text-stone-700 dark:text-stone-300'
+                          }`}
+                        >
+                          <UserAvatar member={member} size="xs" />
+                          <span className="truncate text-xs">{member.name}</span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                {/* Tags */}
+                <div>
+                  <label className="text-xs font-bold uppercase tracking-wider text-stone-600 dark:text-stone-400 block mb-2">
+                    Tags (comma separated)
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="e.g. Statutory, NDPA 2023, Treasury, Urgent"
+                    value={formTags}
+                    onChange={(e) => setFormTags(e.target.value)}
+                    className="w-full px-4 py-2.5 rounded-xl border border-stone-200 dark:border-stone-700/80 bg-stone-50/50 dark:bg-stone-900/50 text-stone-900 dark:text-stone-100 focus:outline-none text-sm"
+                  />
+                </div>
+
+                {/* Checklist Builder */}
+                <div className="space-y-3 pt-3 border-t border-stone-200 dark:border-stone-800">
+                  <label className="text-xs font-bold uppercase tracking-wider text-stone-600 dark:text-stone-400 block">
+                    Verification Checklist Items
+                  </label>
+                  
+                  <div className="space-y-2">
+                    {formChecklist.map((item, idx) => (
+                      <div key={item.id} className="flex items-center space-x-2.5">
+                        <span className="w-5 text-center text-stone-400 font-mono text-xs">{idx + 1}.</span>
+                        <input
+                          type="text"
+                          value={item.text}
+                          onChange={(e) => {
+                            const updated = [...formChecklist];
+                            updated[idx].text = e.target.value;
+                            setFormChecklist(updated);
+                          }}
+                          className="flex-1 px-3 py-2 rounded-xl border border-stone-200 dark:border-stone-700/80 bg-white dark:bg-stone-900 text-xs"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setFormChecklist(prev => prev.filter(c => c.id !== item.id));
+                          }}
+                          className="p-1.5 text-stone-400 hover:text-rose-600 cursor-pointer"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </div>
+                    ))}
+
+                    <div className="flex items-center space-x-2.5 pt-1">
                       <input
                         type="text"
-                        value={item.text}
-                        onChange={(e) => {
-                          const updated = [...formChecklist];
-                          updated[idx].text = e.target.value;
-                          setFormChecklist(updated);
+                        placeholder="Add sub-task or checklist verification..."
+                        value={newChecklistText}
+                        onChange={(e) => setNewChecklistText(e.target.value)}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter') {
+                            e.preventDefault();
+                            if (newChecklistText.trim()) {
+                              setFormChecklist(prev => [...prev, { id: `chk_${Date.now()}`, text: newChecklistText.trim(), completed: false }]);
+                              setNewChecklistText('');
+                            }
+                          }
                         }}
-                        className="flex-1 px-2.5 py-1.5 rounded-lg border border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-900 text-xs"
+                        className="flex-1 px-3 py-2 rounded-xl border border-stone-200 dark:border-stone-700/80 bg-white dark:bg-stone-900 text-xs"
                       />
                       <button
                         type="button"
                         onClick={() => {
-                          setFormChecklist(prev => prev.filter(c => c.id !== item.id));
-                        }}
-                        className="p-1 text-stone-400 hover:text-rose-600 cursor-pointer"
-                      >
-                        <Trash2 className="w-3.5 h-3.5" />
-                      </button>
-                    </div>
-                  ))}
-
-                  <div className="flex items-center space-x-2 pt-1">
-                    <input
-                      type="text"
-                      placeholder="Add sub-task or checklist verification..."
-                      value={newChecklistText}
-                      onChange={(e) => setNewChecklistText(e.target.value)}
-                      onKeyDown={(e) => {
-                        if (e.key === 'Enter') {
-                          e.preventDefault();
                           if (newChecklistText.trim()) {
                             setFormChecklist(prev => [...prev, { id: `chk_${Date.now()}`, text: newChecklistText.trim(), completed: false }]);
                             setNewChecklistText('');
                           }
-                        }
-                      }}
-                      className="flex-1 px-2.5 py-1.5 rounded-lg border border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-900 text-xs"
-                    />
-                    <button
-                      type="button"
-                      onClick={() => {
-                        if (newChecklistText.trim()) {
-                          setFormChecklist(prev => [...prev, { id: `chk_${Date.now()}`, text: newChecklistText.trim(), completed: false }]);
-                          setNewChecklistText('');
-                        }
-                      }}
-                      className="px-3 py-1.5 rounded-lg bg-stone-100 dark:bg-stone-800 hover:bg-stone-200 text-stone-700 dark:text-stone-300 font-bold text-xs cursor-pointer"
-                    >
-                      + Add
-                    </button>
+                        }}
+                        className="px-4 py-2 rounded-xl bg-stone-100 dark:bg-stone-800 hover:bg-stone-200 text-stone-700 dark:text-stone-300 font-bold text-xs cursor-pointer"
+                      >
+                        + Add
+                      </button>
+                    </div>
                   </div>
                 </div>
+
               </div>
 
               {/* Form Action Buttons */}
-              <div className="pt-4 border-t border-stone-200 dark:border-stone-800 flex items-center justify-end space-x-2">
+              <div className="px-6 sm:px-8 py-4 sm:py-5 border-t border-stone-100 dark:border-stone-800/80 bg-stone-50/50 dark:bg-stone-900/40 flex items-center justify-end space-x-3 shrink-0">
                 <button
                   type="button"
                   onClick={() => {
                     setIsCreateModalOpen(false);
                     setEditingTask(null);
                   }}
-                  className="px-3.5 py-2 rounded-xl text-stone-600 dark:text-stone-400 hover:bg-stone-100 dark:hover:bg-stone-800 text-xs font-semibold cursor-pointer"
+                  className="px-5 py-2.5 rounded-xl border border-stone-200 dark:border-stone-700 text-stone-700 dark:text-stone-300 hover:bg-stone-100 dark:hover:bg-stone-800 text-sm font-semibold cursor-pointer transition-colors"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="px-4 py-2 rounded-xl bg-[#0062FF] hover:bg-[#0048C6] active:bg-[#0038A8] text-white text-xs font-bold shadow-xs cursor-pointer"
+                  className="px-6 py-2.5 rounded-xl bg-[#0062FF] hover:bg-[#0048C6] active:bg-[#0038A8] text-white text-sm font-bold shadow-xs cursor-pointer transition-all"
                 >
                   {editingTask ? 'Save Changes' : 'Create Task Deliverable'}
                 </button>

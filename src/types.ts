@@ -17,6 +17,8 @@ export interface Member {
   approvalStatus?: 'approved' | 'pending_approval' | 'rejected';
 }
 
+export type User = Member;
+
 export type ChannelCategory = 'Organization' | 'Projects' | 'Departments' | string;
 
 export interface Channel {
@@ -338,6 +340,7 @@ export interface OrganizationSettings {
 
 export type ActiveSection = 
   | 'home'
+  | 'work'
   | 'messages'
   | 'channels'
   | 'tasks'
@@ -370,6 +373,82 @@ export interface ProjectDeliverable {
   progressPercentage?: number;
 }
 
+export type WorkItemStatus = 'planning' | 'in_progress' | 'active' | 'in_review' | 'completed' | 'blocked';
+
+export interface WorkEvidence {
+  id: string;
+  workItemId: string;
+  taskId?: string;
+  taskTitle?: string;
+  title: string;
+  type: 'link' | 'document' | 'code' | 'metric' | 'note' | 'data' | 'screenshot';
+  url?: string;
+  notes?: string;
+  description?: string;
+  fileName?: string;
+  fileSize?: string;
+  submittedBy: {
+    id: string;
+    name: string;
+    avatar?: string;
+    role?: string;
+  };
+  submittedAt: string;
+  status: 'pending_review' | 'verified' | 'rejected';
+  verifiedBy?: {
+    id: string;
+    name: string;
+  };
+  verifiedAt?: string;
+  verificationNotes?: string;
+}
+
+export interface WorkActivityLog {
+  id: string;
+  workItemId?: string;
+  userId: string;
+  userName: string;
+  userAvatar?: string;
+  action: string;
+  details?: string;
+  description?: string;
+  timestamp: string;
+  type?: 'task_completed' | 'evidence_submitted' | 'status_change' | 'review_signed' | 'task_created' | 'blocked' | 'created';
+}
+
+export interface WorkItem {
+  id: string;
+  title: string; // e.g., "Launch the new website", "Prepare the Q4 financial report"
+  goal: string; // What are we trying to accomplish?
+  deliverable: string; // What tangible result must exist when complete?
+  deliverableDescription?: string;
+  successCriteria: string[]; // Success criteria checklist
+  owner: Member; // Who is ultimately accountable?
+  deadline: string; // When must it be completed?
+  status: WorkItemStatus;
+  progressPercentage: number;
+  tasksCount: number;
+  completedTasksCount: number;
+  inProgressTasksCount: number;
+  blockedTasksCount: number;
+  evidenceCount?: number;
+  reviewTasksCount?: number;
+  contributors: Member[]; // Who is participating?
+  evidence: WorkEvidence[]; // What proves work has actually been completed?
+  activityLog?: WorkActivityLog[];
+  activityLogs?: WorkActivityLog[];
+  department?: string;
+  category?: string;
+  tags?: string[];
+  createdAt: string;
+  updatedAt: string;
+  completionSignOff?: {
+    signedBy: string;
+    signedAt: string;
+    notes?: string;
+  };
+}
+
 export interface TaskItem {
   id: string;
   organizationId?: string;
@@ -381,12 +460,19 @@ export interface TaskItem {
   dueTime?: string; // HH:mm
   assigneeIds: string[];
   assignees?: Member[];
+  assignee?: Member;
   reporterId: string;
   reporterName?: string;
   reporterAvatar?: string;
   tags: string[];
   deliverableId?: string;
   deliverableTitle?: string;
+  workItemId?: string;
+  workItemTitle?: string;
+  evidenceRequired?: boolean;
+  evidenceSubmitted?: boolean;
+  evidenceCount?: number;
+  blockedReason?: string;
   channelId?: string;
   channelName?: string;
   checklist?: TaskChecklistItem[];
@@ -441,7 +527,7 @@ export interface WorkNestPlugin {
   author: string;
   provider?: string;
   category: PluginCategory;
-  integrationType?: 'calendar' | 'email' | 'files' | 'meetings' | 'communication' | 'productivity' | 'compliance' | 'security' | 'storage' | 'analytics' | 'developer' | 'notifications' | 'workflow';
+  integrationType?: 'calendar' | 'email' | 'files' | 'meetings' | 'communication' | 'productivity' | 'compliance' | 'security' | 'storage' | 'analytics' | 'developer' | 'notifications' | 'workflow' | 'custom';
   iconName: string;
   color: string;
   isEnabled: boolean;

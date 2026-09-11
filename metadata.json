@@ -1,6 +1,6 @@
 {
   "name": "WorkNest - Project-Centric Digital Workspace",
-  "description": "WorkNest — Production digital workplace platform for organizational communication and collaboration, featuring real-time messaging, channels, direct messages, secure gazette vault, official email dispatches, real-time organizational calendar, browser-native video consultations, and granular governance.",
+  "description": "WorkNest — Focused workflow execution and accountability platform helping teams turn desired outcomes into structured deliverables, break deliverables into accountable tasks, execute work, and visually monitor who did what.",
   "requestFramePermissions": [
     "camera",
     "microphone"

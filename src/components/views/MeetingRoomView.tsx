@@ -1091,25 +1091,25 @@ export const MeetingRoomView: React.FC<MeetingRoomViewProps> = ({
 
       {/* Host End Meeting / Leave Choice Modal */}
       {showEndMeetingModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-xs animate-fade-in">
-          <div className="w-full max-w-sm rounded-2xl bg-stone-900 border border-stone-800 p-6 space-y-4 shadow-2xl text-center">
-            <div className="w-12 h-12 rounded-full bg-rose-950/80 border border-rose-500/40 text-rose-400 flex items-center justify-center mx-auto">
-              <PhoneOff className="w-6 h-6" />
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 bg-black/75 backdrop-blur-xs animate-fade-in">
+          <div className="w-full max-w-md rounded-2xl sm:rounded-3xl bg-[#111726] border border-stone-800 p-6 sm:p-8 space-y-6 shadow-2xl text-center animate-scale-in">
+            <div className="w-14 h-14 rounded-2xl bg-rose-950/80 border border-rose-500/30 text-rose-400 flex items-center justify-center mx-auto shadow-lg">
+              <PhoneOff className="w-7 h-7" />
             </div>
             
-            <div className="space-y-1">
-              <h3 className="text-base font-bold text-white">Leave or End Meeting?</h3>
-              <p className="text-xs text-stone-400">
-                As the host, you can end this session for everyone or leave other participants in the room.
+            <div className="space-y-2">
+              <h3 className="text-lg font-bold text-white tracking-tight">Leave or End Meeting?</h3>
+              <p className="text-sm text-stone-400 leading-relaxed max-w-sm mx-auto">
+                As the host, you can conclude this deliberation for everyone or leave remaining participants in the session.
               </p>
             </div>
 
-            <div className="space-y-2 pt-2">
+            <div className="space-y-3 pt-2">
               <button
                 id="modal-end-for-all-btn"
                 onClick={handleEndMeetingForAll}
                 disabled={isExiting}
-                className="w-full py-2.5 px-4 rounded-xl bg-rose-600 hover:bg-rose-700 active:bg-rose-800 disabled:opacity-50 text-white font-bold text-xs shadow-md transition-all cursor-pointer"
+                className="w-full py-3 px-5 rounded-xl sm:rounded-2xl bg-rose-600 hover:bg-rose-700 active:bg-rose-800 disabled:opacity-50 text-white font-bold text-sm shadow-md transition-all cursor-pointer"
               >
                 {isExiting ? 'Ending Session...' : 'End Meeting for All'}
               </button>
@@ -1118,7 +1118,7 @@ export const MeetingRoomView: React.FC<MeetingRoomViewProps> = ({
                 id="modal-leave-only-btn"
                 onClick={handleLeaveMeeting}
                 disabled={isExiting}
-                className="w-full py-2.5 px-4 rounded-xl bg-stone-800 hover:bg-stone-700 disabled:opacity-50 text-stone-200 font-semibold text-xs transition-colors cursor-pointer border border-stone-700"
+                className="w-full py-3 px-5 rounded-xl sm:rounded-2xl bg-stone-800/90 hover:bg-stone-700 disabled:opacity-50 text-stone-200 font-semibold text-sm transition-colors cursor-pointer border border-stone-700"
               >
                 {isExiting ? 'Leaving...' : 'Leave Meeting (Keep Room Open)'}
               </button>
@@ -1126,7 +1126,7 @@ export const MeetingRoomView: React.FC<MeetingRoomViewProps> = ({
               <button
                 onClick={() => setShowEndMeetingModal(false)}
                 disabled={isExiting}
-                className="w-full py-2 px-4 rounded-xl text-stone-400 hover:text-white disabled:opacity-50 text-xs font-medium transition-colors cursor-pointer"
+                className="w-full py-2.5 px-5 rounded-xl text-stone-400 hover:text-white disabled:opacity-50 text-sm font-medium transition-colors cursor-pointer"
               >
                 Cancel
               </button>

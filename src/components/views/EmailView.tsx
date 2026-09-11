@@ -380,52 +380,75 @@ export const EmailView: React.FC<EmailViewProps> = ({
 
       {/* Share / Bridge Modal */}
       {showShareModal && (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-xs flex items-center justify-center p-4 z-50">
-          <div className="w-full max-w-md bg-white dark:bg-[#111726] rounded-2xl border border-stone-200 dark:border-stone-800 shadow-2xl p-6 space-y-4">
-            <div className="flex items-center justify-between border-b border-stone-100 dark:border-stone-800 pb-3">
-              <div className="flex items-center space-x-2 text-stone-900 dark:text-stone-100 font-bold text-sm">
-                <Share2 className="w-4 h-4 text-[#0062FF]" />
-                <span>Bridge Email to Channel</span>
+        <div 
+          className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4 sm:p-6 md:p-8 overflow-y-auto"
+          onClick={() => setShowShareModal(false)}
+        >
+          <div 
+            className="w-full max-w-lg bg-white dark:bg-[#111726] rounded-2xl sm:rounded-3xl border border-stone-200 dark:border-stone-800 shadow-2xl overflow-hidden flex flex-col my-6 animate-scale-in"
+            onClick={e => e.stopPropagation()}
+          >
+            {/* Header */}
+            <div className="px-6 sm:px-8 py-5 sm:py-6 border-b border-stone-100 dark:border-stone-800/80 bg-stone-50/70 dark:bg-stone-900/60 flex items-center justify-between shrink-0">
+              <div className="flex items-center space-x-3.5">
+                <div className="w-10 h-10 rounded-xl sm:rounded-2xl bg-blue-50 dark:bg-blue-950/60 text-[#0062FF] dark:text-blue-400 flex items-center justify-center shrink-0 border border-blue-100 dark:border-blue-900/40 shadow-xs">
+                  <Share2 className="w-5 h-5" />
+                </div>
+                <div>
+                  <h3 className="font-bold text-base sm:text-lg text-stone-900 dark:text-stone-100">
+                    Bridge Email to Channel
+                  </h3>
+                  <p className="text-xs text-stone-500 dark:text-stone-400 mt-0.5">
+                    Dispatch correspondence into an active team channel
+                  </p>
+                </div>
               </div>
-              <button onClick={() => setShowShareModal(false)} className="text-stone-400 hover:text-stone-600">
-                <X className="w-4 h-4" />
+              <button 
+                onClick={() => setShowShareModal(false)} 
+                className="p-2 rounded-xl text-stone-400 hover:text-stone-700 dark:hover:text-stone-200 hover:bg-stone-100 dark:hover:bg-stone-800 transition-colors"
+              >
+                <X className="w-5 h-5" />
               </button>
             </div>
 
-            <p className="text-xs text-stone-600 dark:text-stone-400 leading-relaxed">
-              Dispatch reference for <strong>"{selectedEmail?.subject}"</strong> into a live discussion channel.
-            </p>
+            {/* Body */}
+            <div className="px-6 sm:px-8 py-6 space-y-5 text-sm">
+              <div className="p-4 rounded-2xl bg-stone-50/70 dark:bg-stone-900/50 border border-stone-200/70 dark:border-stone-800/70 text-xs sm:text-sm text-stone-600 dark:text-stone-400 leading-relaxed">
+                Dispatching formal reference for <strong className="text-stone-900 dark:text-stone-100">"{selectedEmail?.subject}"</strong> into a collaborative channel deliberation.
+              </div>
 
-            <div className="space-y-3">
-              <label className="text-xs font-bold text-stone-700 dark:text-stone-300">
-                Target Channel
-              </label>
-              <select
-                value={selectedTargetId}
-                onChange={e => setSelectedTargetId(e.target.value)}
-                className="w-full px-3 py-2 rounded-xl border border-stone-200 dark:border-stone-700 bg-stone-50 dark:bg-stone-900 text-xs text-stone-900 dark:text-stone-100"
-              >
-                {(channels || []).map(chan => (
-                  <option key={chan.id} value={chan.id}>#{chan.name}</option>
-                ))}
-              </select>
+              <div>
+                <label className="text-xs font-bold uppercase tracking-wider text-stone-600 dark:text-stone-400 block mb-2">
+                  Target Channel
+                </label>
+                <select
+                  value={selectedTargetId}
+                  onChange={e => setSelectedTargetId(e.target.value)}
+                  className="w-full px-4 py-3 rounded-xl sm:rounded-2xl border border-stone-200 dark:border-stone-700/80 bg-stone-50/50 dark:bg-stone-900/50 text-sm text-stone-900 dark:text-stone-100 focus:outline-none focus:ring-2 focus:ring-[#0062FF]/20 focus:border-[#0062FF] cursor-pointer transition-all"
+                >
+                  {(channels || []).map(chan => (
+                    <option key={chan.id} value={chan.id}>#{chan.name}</option>
+                  ))}
+                </select>
+              </div>
             </div>
 
-            <div className="flex items-center justify-end space-x-2 pt-2">
+            {/* Footer */}
+            <div className="px-6 sm:px-8 py-4 sm:py-5 border-t border-stone-100 dark:border-stone-800/80 bg-stone-50/50 dark:bg-stone-900/40 flex items-center justify-end space-x-3 shrink-0">
               <button
                 onClick={() => setShowShareModal(false)}
-                className="px-4 py-2 rounded-xl border border-stone-200 dark:border-stone-700 text-xs font-semibold text-stone-600 dark:text-stone-300 hover:bg-stone-100 dark:hover:bg-stone-800"
+                className="px-5 py-2.5 rounded-xl border border-stone-200 dark:border-stone-700 text-sm font-semibold text-stone-700 dark:text-stone-300 hover:bg-stone-100 dark:hover:bg-stone-800 transition-colors"
               >
                 Cancel
               </button>
               <button
                 onClick={handleExecuteBridgeShare}
                 disabled={shareSuccess}
-                className="px-4 py-2 rounded-xl bg-[#0062FF] hover:bg-[#0048C6] text-white text-xs font-bold shadow-xs transition-colors flex items-center space-x-1.5"
+                className="px-6 py-2.5 rounded-xl bg-[#0062FF] hover:bg-[#0048C6] text-white text-sm font-bold shadow-xs transition-colors flex items-center space-x-2 disabled:opacity-50"
               >
                 {shareSuccess ? (
                   <>
-                    <Check className="w-3.5 h-3.5" />
+                    <Check className="w-4 h-4" />
                     <span>Dispatched!</span>
                   </>
                 ) : (

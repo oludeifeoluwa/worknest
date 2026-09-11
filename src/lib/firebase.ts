@@ -45,16 +45,21 @@ import {
 
 const env = (import.meta as unknown as { env: Record<string, string | undefined> }).env || {};
 
-export const firebaseConfig = {
-  apiKey: env.VITE_FIREBASE_API_KEY || '',
-  authDomain: env.VITE_FIREBASE_AUTH_DOMAIN || '',
-  projectId: env.VITE_FIREBASE_PROJECT_ID || '',
-  storageBucket: env.VITE_FIREBASE_STORAGE_BUCKET || '',
-  messagingSenderId: env.VITE_FIREBASE_MESSAGING_SENDER_ID || '',
-  appId: env.VITE_FIREBASE_APP_ID || '',
+const sanitizeEnv = (val?: string): string => {
+  if (!val) return '';
+  return val.trim().replace(/^["']|["'],?$/g, '').replace(/,$/, '').trim();
 };
 
-const databaseId = env.VITE_FIREBASE_FIRESTORE_DATABASE_ID || 'worknest';
+export const firebaseConfig = {
+  apiKey: sanitizeEnv(env.VITE_FIREBASE_API_KEY),
+  authDomain: sanitizeEnv(env.VITE_FIREBASE_AUTH_DOMAIN),
+  projectId: sanitizeEnv(env.VITE_FIREBASE_PROJECT_ID),
+  storageBucket: sanitizeEnv(env.VITE_FIREBASE_STORAGE_BUCKET),
+  messagingSenderId: sanitizeEnv(env.VITE_FIREBASE_MESSAGING_SENDER_ID),
+  appId: sanitizeEnv(env.VITE_FIREBASE_APP_ID),
+};
+
+const databaseId = sanitizeEnv(env.VITE_FIREBASE_FIRESTORE_DATABASE_ID) || 'worknest';
 
 // Valid configuration check: ensures an authentic non-empty API key is present
 export const isFirebaseConfigured = Boolean(

@@ -90,174 +90,207 @@ export const GlobalSearchModal: React.FC<GlobalSearchModalProps> = ({
     : safeEmails.slice(0, 2);
 
   return (
-    <div className="fixed inset-0 z-50 flex items-start justify-center pt-16 sm:pt-24 px-4 bg-stone-900/60 backdrop-blur-xs select-none">
+    <div className="fixed inset-0 z-50 flex items-start justify-center pt-12 sm:pt-20 px-4 bg-black/60 backdrop-blur-xs select-none overflow-y-auto">
       <div 
         className="fixed inset-0"
         onClick={onClose}
       />
-      <div className="relative z-10 w-full max-w-xl bg-white dark:bg-[#111726] rounded-2xl border border-stone-200 dark:border-stone-800 shadow-2xl overflow-hidden flex flex-col max-h-[80vh]">
+      <div className="relative z-10 w-full max-w-2xl bg-white dark:bg-[#111726] rounded-2xl sm:rounded-3xl border border-stone-200 dark:border-stone-800 shadow-2xl overflow-hidden flex flex-col max-h-[84vh] animate-scale-in my-4">
         
         {/* Search Input Bar */}
-        <div className="p-3.5 border-b border-stone-200 dark:border-stone-800 flex items-center space-x-3">
-          <Search className="w-4 h-4 text-stone-400 shrink-0" />
+        <div className="px-6 py-5 border-b border-stone-100 dark:border-stone-800/80 bg-stone-50/70 dark:bg-stone-900/60 flex items-center space-x-4 shrink-0">
+          <div className="w-9 h-9 rounded-xl bg-blue-50 dark:bg-blue-950/60 text-[#0062FF] dark:text-blue-400 flex items-center justify-center shrink-0 border border-blue-100 dark:border-blue-900/40">
+            <Search className="w-4 h-4" />
+          </div>
           <input
             type="text"
             autoFocus
             value={query}
             onChange={e => setQuery(e.target.value)}
-            placeholder="Search directives, staff, files, emails..."
-            className="flex-1 bg-transparent text-xs sm:text-sm text-stone-900 dark:text-stone-100 placeholder:text-stone-400 focus:outline-none"
+            placeholder="Search directives, staff, files, emails, channels..."
+            className="flex-1 bg-transparent text-sm sm:text-base text-stone-900 dark:text-stone-100 placeholder:text-stone-400 focus:outline-none font-medium"
           />
-          <kbd className="px-1.5 py-0.5 text-[10px] font-mono text-stone-400 border border-stone-200 dark:border-stone-700 rounded">
-            ESC
-          </kbd>
+          <div className="flex items-center space-x-2 shrink-0">
+            <kbd className="hidden sm:inline-flex items-center px-2 py-1 text-xs font-mono text-stone-400 bg-white dark:bg-stone-800 border border-stone-200 dark:border-stone-700 rounded-lg shadow-xs">
+              ESC
+            </kbd>
+            <button
+              onClick={onClose}
+              className="p-1.5 rounded-lg text-stone-400 hover:text-stone-700 dark:hover:text-stone-200 hover:bg-stone-100 dark:hover:bg-stone-800 transition-colors"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          </div>
         </div>
 
         {/* Results List */}
-        <div className="flex-1 overflow-y-auto p-3 space-y-4 text-xs scrollbar-thin">
+        <div className="flex-1 overflow-y-auto p-5 sm:p-6 space-y-6 text-sm scrollbar-thin">
           
           {/* Channels Group */}
           {matchingChannels.length > 0 && (
-            <div className="space-y-1">
-              <div className="text-[10px] font-bold uppercase tracking-wider text-stone-400 px-2">
-                Channels
+            <div className="space-y-2">
+              <div className="text-xs font-bold uppercase tracking-wider text-stone-500 dark:text-stone-400 px-2 flex items-center space-x-1.5">
+                <span>Council Channels</span>
+                <span className="w-1.5 h-1.5 rounded-full bg-[#0062FF]" />
               </div>
-              {matchingChannels.map(c => (
-                <div
-                  key={c.id}
-                  onClick={() => {
-                    onSelectChannel?.(c);
-                    onClose();
-                  }}
-                  className="flex items-center justify-between p-2 rounded-xl hover:bg-blue-50/60 dark:hover:bg-blue-950/40 cursor-pointer transition-colors"
-                >
-                  <div className="flex items-center space-x-2.5">
-                    <Hash className="w-4 h-4 text-[#0062FF]" />
-                    <div>
-                      <span className="font-semibold text-stone-800 dark:text-stone-200">
-                        #{c.name}
-                      </span>
-                      <span className="text-stone-400 ml-2 text-[11px]">
-                        {c.topic}
-                      </span>
+              <div className="space-y-1">
+                {matchingChannels.map(c => (
+                  <div
+                    key={c.id}
+                    onClick={() => {
+                      onSelectChannel?.(c);
+                      onClose();
+                    }}
+                    className="flex items-center justify-between p-3 rounded-xl hover:bg-blue-50/50 dark:hover:bg-blue-950/40 cursor-pointer transition-colors border border-transparent hover:border-blue-100 dark:hover:border-blue-900/40"
+                  >
+                    <div className="flex items-center space-x-3">
+                      <div className="w-8 h-8 rounded-lg bg-stone-100 dark:bg-stone-800 text-[#0062FF] flex items-center justify-center shrink-0">
+                        <Hash className="w-4 h-4" />
+                      </div>
+                      <div>
+                        <span className="font-semibold text-stone-800 dark:text-stone-200">
+                          #{c.name}
+                        </span>
+                        {c.topic && (
+                          <span className="text-stone-400 ml-2 text-xs">
+                            {c.topic}
+                          </span>
+                        )}
+                      </div>
                     </div>
+                    <ArrowRight className="w-4 h-4 text-stone-400" />
                   </div>
-                  <ArrowRight className="w-3.5 h-3.5 text-stone-400" />
-                </div>
-              ))}
+                ))}
+              </div>
             </div>
           )}
 
           {/* Members Group */}
           {matchingMembers.length > 0 && (
-            <div className="space-y-1">
-              <div className="text-[10px] font-bold uppercase tracking-wider text-stone-400 px-2">
-                Staff Directory
+            <div className="space-y-2">
+              <div className="text-xs font-bold uppercase tracking-wider text-stone-500 dark:text-stone-400 px-2 flex items-center space-x-1.5">
+                <span>Staff Directory</span>
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
               </div>
-              {matchingMembers.map(m => (
-                <div
-                  key={m.id}
-                  onClick={() => {
-                    onSelectMember?.(m);
-                    onClose();
-                  }}
-                  className="flex items-center justify-between p-2 rounded-xl hover:bg-blue-50/60 dark:hover:bg-blue-950/40 cursor-pointer transition-colors"
-                >
-                  <div className="flex items-center space-x-2.5">
-                    <UserAvatar
-                      member={m}
-                      size="sm"
-                      shape="rounded"
-                    />
-                    <div>
-                      <span className="font-semibold text-stone-800 dark:text-stone-200">
-                        {m.name}
-                      </span>
-                      <span className="text-stone-400 ml-2 text-[11px]">
-                        {m.role} • {m.department}
-                      </span>
+              <div className="space-y-1">
+                {matchingMembers.map(m => (
+                  <div
+                    key={m.id}
+                    onClick={() => {
+                      onSelectMember?.(m);
+                      onClose();
+                    }}
+                    className="flex items-center justify-between p-3 rounded-xl hover:bg-blue-50/50 dark:hover:bg-blue-950/40 cursor-pointer transition-colors border border-transparent hover:border-blue-100 dark:hover:border-blue-900/40"
+                  >
+                    <div className="flex items-center space-x-3">
+                      <UserAvatar
+                        member={m}
+                        size="md"
+                        shape="rounded"
+                      />
+                      <div>
+                        <span className="font-semibold text-stone-800 dark:text-stone-200">
+                          {m.name}
+                        </span>
+                        <span className="text-stone-400 ml-2 text-xs">
+                          {m.role} • {m.department}
+                        </span>
+                      </div>
                     </div>
+                    <ArrowRight className="w-4 h-4 text-stone-400" />
                   </div>
-                  <ArrowRight className="w-3.5 h-3.5 text-stone-400" />
-                </div>
-              ))}
+                ))}
+              </div>
             </div>
           )}
 
           {/* Files Group */}
           {matchingFiles.length > 0 && (
-            <div className="space-y-1">
-              <div className="text-[10px] font-bold uppercase tracking-wider text-stone-400 px-2">
-                Statutory Files & Gazettes
+            <div className="space-y-2">
+              <div className="text-xs font-bold uppercase tracking-wider text-stone-500 dark:text-stone-400 px-2 flex items-center space-x-1.5">
+                <span>Statutory Vault Files & Gazettes</span>
+                <span className="w-1.5 h-1.5 rounded-full bg-cyan-500" />
               </div>
-              {matchingFiles.map(f => (
-                <div
-                  key={f.id}
-                  onClick={() => {
-                    onSelectFile?.(f);
-                    onClose();
-                  }}
-                  className="flex items-center justify-between p-2 rounded-xl hover:bg-blue-50/60 dark:hover:bg-blue-950/40 cursor-pointer transition-colors"
-                >
-                  <div className="flex items-center space-x-2.5 truncate">
-                    <FolderKanban className="w-4 h-4 text-[#0062FF] shrink-0" />
-                    <span className="font-medium text-stone-800 dark:text-stone-200 truncate">
-                      {f.name}
-                    </span>
-                    <span className="text-stone-400 text-[11px] shrink-0">
-                      ({f.size})
-                    </span>
+              <div className="space-y-1">
+                {matchingFiles.map(f => (
+                  <div
+                    key={f.id}
+                    onClick={() => {
+                      onSelectFile?.(f);
+                      onClose();
+                    }}
+                    className="flex items-center justify-between p-3 rounded-xl hover:bg-blue-50/50 dark:hover:bg-blue-950/40 cursor-pointer transition-colors border border-transparent hover:border-blue-100 dark:hover:border-blue-900/40"
+                  >
+                    <div className="flex items-center space-x-3 truncate">
+                      <div className="w-8 h-8 rounded-lg bg-cyan-50 dark:bg-cyan-950/60 text-cyan-600 flex items-center justify-center shrink-0">
+                        <FolderKanban className="w-4 h-4" />
+                      </div>
+                      <span className="font-medium text-stone-800 dark:text-stone-200 truncate">
+                        {f.name}
+                      </span>
+                      <span className="text-stone-400 text-xs shrink-0">
+                        ({f.size})
+                      </span>
+                    </div>
+                    <ArrowRight className="w-4 h-4 text-stone-400 shrink-0" />
                   </div>
-                  <ArrowRight className="w-3.5 h-3.5 text-stone-400 shrink-0" />
-                </div>
-              ))}
+                ))}
+              </div>
             </div>
           )}
 
           {/* Emails Group */}
           {matchingEmails.length > 0 && (
-            <div className="space-y-1">
-              <div className="text-[10px] font-bold uppercase tracking-wider text-stone-400 px-2">
-                Dispatches
+            <div className="space-y-2">
+              <div className="text-xs font-bold uppercase tracking-wider text-stone-500 dark:text-stone-400 px-2 flex items-center space-x-1.5">
+                <span>Official Dispatches</span>
+                <span className="w-1.5 h-1.5 rounded-full bg-amber-500" />
               </div>
-              {matchingEmails.map(e => (
-                <div
-                  key={e.id}
-                  onClick={() => {
-                    onSelectEmail?.(e);
-                    onClose();
-                  }}
-                  className="flex items-center justify-between p-2 rounded-xl hover:bg-blue-50/60 dark:hover:bg-blue-950/40 cursor-pointer transition-colors"
-                >
-                  <div className="flex items-center space-x-2.5 truncate">
-                    <Mail className="w-4 h-4 text-[#0062FF] shrink-0" />
-                    <div className="truncate">
-                      <span className="font-medium text-stone-800 dark:text-stone-200 truncate">
-                        {e.subject}
-                      </span>
-                      <span className="text-stone-400 ml-2 text-[11px]">
-                        From: {e.sender.name}
-                      </span>
+              <div className="space-y-1">
+                {matchingEmails.map(e => (
+                  <div
+                    key={e.id}
+                    onClick={() => {
+                      onSelectEmail?.(e);
+                      onClose();
+                    }}
+                    className="flex items-center justify-between p-3 rounded-xl hover:bg-blue-50/50 dark:hover:bg-blue-950/40 cursor-pointer transition-colors border border-transparent hover:border-blue-100 dark:hover:border-blue-900/40"
+                  >
+                    <div className="flex items-center space-x-3 truncate">
+                      <div className="w-8 h-8 rounded-lg bg-amber-50 dark:bg-amber-950/60 text-amber-600 flex items-center justify-center shrink-0">
+                        <Mail className="w-4 h-4" />
+                      </div>
+                      <div className="truncate">
+                        <span className="font-medium text-stone-800 dark:text-stone-200 truncate">
+                          {e.subject}
+                        </span>
+                        <span className="text-stone-400 ml-2 text-xs">
+                          From: {e.sender.name}
+                        </span>
+                      </div>
                     </div>
+                    <ArrowRight className="w-4 h-4 text-stone-400 shrink-0" />
                   </div>
-                  <ArrowRight className="w-3.5 h-3.5 text-stone-400" />
-                </div>
-              ))}
+                ))}
+              </div>
             </div>
           )}
 
           {/* Empty search prompt */}
           {matchingChannels.length === 0 && matchingMembers.length === 0 && matchingFiles.length === 0 && matchingEmails.length === 0 && (
-            <div className="py-12 text-center text-stone-400 text-xs">
-              No results found for &ldquo;{query}&rdquo;
+            <div className="py-16 text-center text-stone-400 space-y-2">
+              <Search className="w-8 h-8 mx-auto text-stone-300 dark:text-stone-600" />
+              <p className="text-sm font-medium">No results found for &ldquo;{query}&rdquo;</p>
+              <p className="text-xs text-stone-500">Try searching for task titles, staff names, documents, or channel names</p>
             </div>
           )}
         </div>
 
         {/* Footer info */}
-        <div className="p-2.5 bg-stone-50 dark:bg-stone-900 border-t border-stone-200 dark:border-stone-800 flex items-center justify-between text-[11px] text-stone-400 px-4">
-          <div className="flex items-center space-x-1">
-            <span>WorkNest Unified Index</span>
+        <div className="px-6 py-3.5 bg-stone-50/50 dark:bg-stone-900/40 border-t border-stone-100 dark:border-stone-800/80 flex items-center justify-between text-xs text-stone-400 shrink-0">
+          <div className="flex items-center space-x-2">
+            <span className="w-2 h-2 rounded-full bg-emerald-500" />
+            <span>WorkNest Unified Real-Time Index</span>
           </div>
           <span>Press ESC to close</span>
         </div>

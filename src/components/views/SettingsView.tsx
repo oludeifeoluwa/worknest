@@ -468,47 +468,76 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
 
             {/* Add Domain Modal */}
             {showAddDomain && (
-              <div className="fixed inset-0 bg-black/50 backdrop-blur-xs flex items-center justify-center p-4 z-50">
-                <form onSubmit={handleAddNewDomainSubmit} className="w-full max-w-md bg-white dark:bg-[#111726] rounded-2xl border border-stone-200 dark:border-stone-800 p-6 space-y-4 shadow-2xl">
-                  <h3 className="font-bold text-sm text-stone-900 dark:text-stone-100">
-                    Add Approved Domain
-                  </h3>
-                  {domainError && (
-                    <div className="p-2 rounded-lg bg-rose-50 text-rose-700 text-xs">
-                      {domainError}
+              <div 
+                className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4 sm:p-6 md:p-8 overflow-y-auto"
+                onClick={() => setShowAddDomain(false)}
+              >
+                <form 
+                  onSubmit={handleAddNewDomainSubmit} 
+                  onClick={e => e.stopPropagation()}
+                  className="w-full max-w-lg bg-white dark:bg-[#111726] rounded-2xl sm:rounded-3xl border border-stone-200 dark:border-stone-800 shadow-2xl overflow-hidden flex flex-col my-6 animate-scale-in"
+                >
+                  <div className="px-6 sm:px-8 py-5 border-b border-stone-100 dark:border-stone-800/80 bg-stone-50/70 dark:bg-stone-900/60 flex items-center justify-between">
+                    <div>
+                      <h3 className="font-bold text-base text-stone-900 dark:text-stone-100">
+                        Add Approved Domain
+                      </h3>
+                      <p className="text-xs text-stone-500 dark:text-stone-400 mt-0.5">
+                        Whitelist corporate or organizational email domains
+                      </p>
                     </div>
-                  )}
-                  <div className="space-y-1.5">
-                    <label className="text-xs font-bold text-stone-700 dark:text-stone-300">Domain name</label>
-                    <input
-                      type="text"
-                      placeholder="e.g. agency.gov.ng"
-                      value={newDomainStr}
-                      onChange={e => setNewDomainStr(e.target.value)}
-                      className="w-full px-3 py-2 rounded-xl border border-stone-200 dark:border-stone-700 bg-stone-50 dark:bg-stone-900 text-xs text-stone-900 dark:text-stone-100 focus:outline-none"
-                    />
+                    <button 
+                      type="button" 
+                      onClick={() => setShowAddDomain(false)}
+                      className="p-1.5 rounded-xl text-stone-400 hover:text-stone-700 dark:hover:text-stone-200 hover:bg-stone-100 dark:hover:bg-stone-800 transition-colors"
+                    >
+                      ✕
+                    </button>
                   </div>
-                  <div className="space-y-1.5">
-                    <label className="text-xs font-bold text-stone-700 dark:text-stone-300">Description</label>
-                    <input
-                      type="text"
-                      placeholder="e.g. Department of Finance"
-                      value={newDomainDesc}
-                      onChange={e => setNewDomainDesc(e.target.value)}
-                      className="w-full px-3 py-2 rounded-xl border border-stone-200 dark:border-stone-700 bg-stone-50 dark:bg-stone-900 text-xs text-stone-900 dark:text-stone-100 focus:outline-none"
-                    />
+
+                  <div className="px-6 sm:px-8 py-6 space-y-5 text-sm">
+                    {domainError && (
+                      <div className="p-3 rounded-xl bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-900/50 text-rose-700 dark:text-rose-300 text-xs">
+                        {domainError}
+                      </div>
+                    )}
+                    <div>
+                      <label className="text-xs font-bold uppercase tracking-wider text-stone-600 dark:text-stone-400 block mb-2">
+                        Domain Name
+                      </label>
+                      <input
+                        type="text"
+                        placeholder="e.g. agency.gov.ng"
+                        value={newDomainStr}
+                        onChange={e => setNewDomainStr(e.target.value)}
+                        className="w-full px-4 py-3 rounded-xl sm:rounded-2xl border border-stone-200 dark:border-stone-700/80 bg-stone-50/50 dark:bg-stone-900/50 text-sm text-stone-900 dark:text-stone-100 focus:outline-none focus:ring-2 focus:ring-[#0062FF]/20 focus:border-[#0062FF] transition-all"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-xs font-bold uppercase tracking-wider text-stone-600 dark:text-stone-400 block mb-2">
+                        Description / Department
+                      </label>
+                      <input
+                        type="text"
+                        placeholder="e.g. Department of Finance & Operations"
+                        value={newDomainDesc}
+                        onChange={e => setNewDomainDesc(e.target.value)}
+                        className="w-full px-4 py-3 rounded-xl sm:rounded-2xl border border-stone-200 dark:border-stone-700/80 bg-stone-50/50 dark:bg-stone-900/50 text-sm text-stone-900 dark:text-stone-100 focus:outline-none focus:ring-2 focus:ring-[#0062FF]/20 focus:border-[#0062FF] transition-all"
+                      />
+                    </div>
                   </div>
-                  <div className="flex justify-end space-x-2 pt-2">
+
+                  <div className="px-6 sm:px-8 py-4 sm:py-5 border-t border-stone-100 dark:border-stone-800/80 bg-stone-50/50 dark:bg-stone-900/40 flex justify-end space-x-3">
                     <button
                       type="button"
                       onClick={() => setShowAddDomain(false)}
-                      className="px-4 py-2 rounded-xl border border-stone-200 dark:border-stone-700 text-xs font-semibold text-stone-600 dark:text-stone-300"
+                      className="px-5 py-2.5 rounded-xl border border-stone-200 dark:border-stone-700 text-sm font-semibold text-stone-700 dark:text-stone-300 hover:bg-stone-100 dark:hover:bg-stone-800 transition-colors"
                     >
                       Cancel
                     </button>
                     <button
                       type="submit"
-                      className="px-4 py-2 rounded-xl bg-[#0062FF] hover:bg-[#0048C6] text-white text-xs font-bold"
+                      className="px-6 py-2.5 rounded-xl bg-[#0062FF] hover:bg-[#0048C6] text-white text-sm font-bold shadow-xs transition-colors"
                     >
                       Add Domain
                     </button>
@@ -596,51 +625,85 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
 
             {/* Add Member Modal */}
             {showAddMember && (
-              <div className="fixed inset-0 bg-black/50 backdrop-blur-xs flex items-center justify-center p-4 z-50">
-                <form onSubmit={handleCreateMember} className="w-full max-w-md bg-white dark:bg-[#111726] rounded-2xl border border-stone-200 dark:border-stone-800 p-6 space-y-4 shadow-2xl">
-                  <h3 className="font-bold text-sm text-stone-900 dark:text-stone-100">
-                    Add New Officer
-                  </h3>
-                  <div className="space-y-1.5">
-                    <label className="text-xs font-bold text-stone-700 dark:text-stone-300">Name</label>
-                    <input
-                      type="text"
-                      required
-                      value={newMemName}
-                      onChange={e => setNewMemName(e.target.value)}
-                      className="w-full px-3 py-2 rounded-xl border border-stone-200 dark:border-stone-700 bg-stone-50 dark:bg-stone-900 text-xs text-stone-900 dark:text-stone-100 focus:outline-none"
-                    />
+              <div 
+                className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4 sm:p-6 md:p-8 overflow-y-auto"
+                onClick={() => setShowAddMember(false)}
+              >
+                <form 
+                  onSubmit={handleCreateMember} 
+                  onClick={e => e.stopPropagation()}
+                  className="w-full max-w-lg bg-white dark:bg-[#111726] rounded-2xl sm:rounded-3xl border border-stone-200 dark:border-stone-800 shadow-2xl overflow-hidden flex flex-col my-6 animate-scale-in"
+                >
+                  <div className="px-6 sm:px-8 py-5 border-b border-stone-100 dark:border-stone-800/80 bg-stone-50/70 dark:bg-stone-900/60 flex items-center justify-between">
+                    <div>
+                      <h3 className="font-bold text-base text-stone-900 dark:text-stone-100">
+                        Add New Personnel / Officer
+                      </h3>
+                      <p className="text-xs text-stone-500 dark:text-stone-400 mt-0.5">
+                        Create an accountable team member record
+                      </p>
+                    </div>
+                    <button 
+                      type="button" 
+                      onClick={() => setShowAddMember(false)}
+                      className="p-1.5 rounded-xl text-stone-400 hover:text-stone-700 dark:hover:text-stone-200 hover:bg-stone-100 dark:hover:bg-stone-800 transition-colors"
+                    >
+                      ✕
+                    </button>
                   </div>
-                  <div className="space-y-1.5">
-                    <label className="text-xs font-bold text-stone-700 dark:text-stone-300">Official Email</label>
-                    <input
-                      type="email"
-                      required
-                      value={newMemEmail}
-                      onChange={e => setNewMemEmail(e.target.value)}
-                      className="w-full px-3 py-2 rounded-xl border border-stone-200 dark:border-stone-700 bg-stone-50 dark:bg-stone-900 text-xs text-stone-900 dark:text-stone-100 focus:outline-none"
-                    />
+
+                  <div className="px-6 sm:px-8 py-6 space-y-5 text-sm">
+                    <div>
+                      <label className="text-xs font-bold uppercase tracking-wider text-stone-600 dark:text-stone-400 block mb-2">
+                        Full Name <span className="text-rose-500">*</span>
+                      </label>
+                      <input
+                        type="text"
+                        required
+                        placeholder="e.g. David Vance"
+                        value={newMemName}
+                        onChange={e => setNewMemName(e.target.value)}
+                        className="w-full px-4 py-3 rounded-xl sm:rounded-2xl border border-stone-200 dark:border-stone-700/80 bg-stone-50/50 dark:bg-stone-900/50 text-sm text-stone-900 dark:text-stone-100 focus:outline-none focus:ring-2 focus:ring-[#0062FF]/20 focus:border-[#0062FF] transition-all"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-xs font-bold uppercase tracking-wider text-stone-600 dark:text-stone-400 block mb-2">
+                        Official Email <span className="text-rose-500">*</span>
+                      </label>
+                      <input
+                        type="email"
+                        required
+                        placeholder="e.g. d.vance@worknest.app"
+                        value={newMemEmail}
+                        onChange={e => setNewMemEmail(e.target.value)}
+                        className="w-full px-4 py-3 rounded-xl sm:rounded-2xl border border-stone-200 dark:border-stone-700/80 bg-stone-50/50 dark:bg-stone-900/50 text-sm text-stone-900 dark:text-stone-100 focus:outline-none focus:ring-2 focus:ring-[#0062FF]/20 focus:border-[#0062FF] transition-all"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-xs font-bold uppercase tracking-wider text-stone-600 dark:text-stone-400 block mb-2">
+                        Department / Unit
+                      </label>
+                      <input
+                        type="text"
+                        placeholder="e.g. Executive Directorate / Compliance"
+                        value={newMemDept}
+                        onChange={e => setNewMemDept(e.target.value)}
+                        className="w-full px-4 py-3 rounded-xl sm:rounded-2xl border border-stone-200 dark:border-stone-700/80 bg-stone-50/50 dark:bg-stone-900/50 text-sm text-stone-900 dark:text-stone-100 focus:outline-none focus:ring-2 focus:ring-[#0062FF]/20 focus:border-[#0062FF] transition-all"
+                      />
+                    </div>
                   </div>
-                  <div className="space-y-1.5">
-                    <label className="text-xs font-bold text-stone-700 dark:text-stone-300">Department</label>
-                    <input
-                      type="text"
-                      value={newMemDept}
-                      onChange={e => setNewMemDept(e.target.value)}
-                      className="w-full px-3 py-2 rounded-xl border border-stone-200 dark:border-stone-700 bg-stone-50 dark:bg-stone-900 text-xs text-stone-900 dark:text-stone-100 focus:outline-none"
-                    />
-                  </div>
-                  <div className="flex justify-end space-x-2 pt-2">
+
+                  <div className="px-6 sm:px-8 py-4 sm:py-5 border-t border-stone-100 dark:border-stone-800/80 bg-stone-50/50 dark:bg-stone-900/40 flex justify-end space-x-3">
                     <button
                       type="button"
                       onClick={() => setShowAddMember(false)}
-                      className="px-4 py-2 rounded-xl border border-stone-200 dark:border-stone-700 text-xs font-semibold text-stone-600 dark:text-stone-300"
+                      className="px-5 py-2.5 rounded-xl border border-stone-200 dark:border-stone-700 text-sm font-semibold text-stone-700 dark:text-stone-300 hover:bg-stone-100 dark:hover:bg-stone-800 transition-colors"
                     >
                       Cancel
                     </button>
                     <button
                       type="submit"
-                      className="px-4 py-2 rounded-xl bg-[#0062FF] hover:bg-[#0048C6] text-white text-xs font-bold"
+                      className="px-6 py-2.5 rounded-xl bg-[#0062FF] hover:bg-[#0048C6] text-white text-sm font-bold shadow-xs transition-colors"
                     >
                       Create Officer
                     </button>
@@ -702,49 +765,79 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
 
             {/* Send Invite Modal */}
             {showInviteModal && (
-              <div className="fixed inset-0 bg-black/50 backdrop-blur-xs flex items-center justify-center p-4 z-50">
-                <form onSubmit={handleSendInviteSubmit} className="w-full max-w-md bg-white dark:bg-[#111726] rounded-2xl border border-stone-200 dark:border-stone-800 p-6 space-y-4 shadow-2xl">
-                  <h3 className="font-bold text-sm text-stone-900 dark:text-stone-100">
-                    Invite Staff Member
-                  </h3>
-                  {inviteError && (
-                    <div className="p-2 rounded-lg bg-rose-50 text-rose-700 text-xs">
-                      {inviteError}
+              <div 
+                className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4 sm:p-6 md:p-8 overflow-y-auto"
+                onClick={() => setShowInviteModal(false)}
+              >
+                <form 
+                  onSubmit={handleSendInviteSubmit} 
+                  onClick={e => e.stopPropagation()}
+                  className="w-full max-w-lg bg-white dark:bg-[#111726] rounded-2xl sm:rounded-3xl border border-stone-200 dark:border-stone-800 shadow-2xl overflow-hidden flex flex-col my-6 animate-scale-in"
+                >
+                  <div className="px-6 sm:px-8 py-5 border-b border-stone-100 dark:border-stone-800/80 bg-stone-50/70 dark:bg-stone-900/60 flex items-center justify-between">
+                    <div>
+                      <h3 className="font-bold text-base text-stone-900 dark:text-stone-100">
+                        Invite Staff Member
+                      </h3>
+                      <p className="text-xs text-stone-500 dark:text-stone-400 mt-0.5">
+                        Issue a secured onboarding invitation to a new officer
+                      </p>
                     </div>
-                  )}
-                  <div className="space-y-1.5">
-                    <label className="text-xs font-bold text-stone-700 dark:text-stone-300">Staff Email</label>
-                    <input
-                      type="email"
-                      required
-                      placeholder="e.g. officer@worknest.app"
-                      value={inviteEmail}
-                      onChange={e => setInviteEmail(e.target.value)}
-                      className="w-full px-3 py-2 rounded-xl border border-stone-200 dark:border-stone-700 bg-stone-50 dark:bg-stone-900 text-xs text-stone-900 dark:text-stone-100 focus:outline-none"
-                    />
+                    <button 
+                      type="button" 
+                      onClick={() => setShowInviteModal(false)}
+                      className="p-1.5 rounded-xl text-stone-400 hover:text-stone-700 dark:hover:text-stone-200 hover:bg-stone-100 dark:hover:bg-stone-800 transition-colors"
+                    >
+                      ✕
+                    </button>
                   </div>
-                  <div className="space-y-1.5">
-                    <label className="text-xs font-bold text-stone-700 dark:text-stone-300">Department</label>
-                    <input
-                      type="text"
-                      value={inviteDept}
-                      onChange={e => setInviteDept(e.target.value)}
-                      className="w-full px-3 py-2 rounded-xl border border-stone-200 dark:border-stone-700 bg-stone-50 dark:bg-stone-900 text-xs text-stone-900 dark:text-stone-100 focus:outline-none"
-                    />
+
+                  <div className="px-6 sm:px-8 py-6 space-y-5 text-sm">
+                    {inviteError && (
+                      <div className="p-3 rounded-xl bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-900/50 text-rose-700 dark:text-rose-300 text-xs">
+                        {inviteError}
+                      </div>
+                    )}
+                    <div>
+                      <label className="text-xs font-bold uppercase tracking-wider text-stone-600 dark:text-stone-400 block mb-2">
+                        Staff Email <span className="text-rose-500">*</span>
+                      </label>
+                      <input
+                        type="email"
+                        required
+                        placeholder="e.g. officer@worknest.app"
+                        value={inviteEmail}
+                        onChange={e => setInviteEmail(e.target.value)}
+                        className="w-full px-4 py-3 rounded-xl sm:rounded-2xl border border-stone-200 dark:border-stone-700/80 bg-stone-50/50 dark:bg-stone-900/50 text-sm text-stone-900 dark:text-stone-100 focus:outline-none focus:ring-2 focus:ring-[#0062FF]/20 focus:border-[#0062FF] transition-all"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-xs font-bold uppercase tracking-wider text-stone-600 dark:text-stone-400 block mb-2">
+                        Assigned Department
+                      </label>
+                      <input
+                        type="text"
+                        placeholder="e.g. Finance & Auditing"
+                        value={inviteDept}
+                        onChange={e => setInviteDept(e.target.value)}
+                        className="w-full px-4 py-3 rounded-xl sm:rounded-2xl border border-stone-200 dark:border-stone-700/80 bg-stone-50/50 dark:bg-stone-900/50 text-sm text-stone-900 dark:text-stone-100 focus:outline-none focus:ring-2 focus:ring-[#0062FF]/20 focus:border-[#0062FF] transition-all"
+                      />
+                    </div>
                   </div>
-                  <div className="flex justify-end space-x-2 pt-2">
+
+                  <div className="px-6 sm:px-8 py-4 sm:py-5 border-t border-stone-100 dark:border-stone-800/80 bg-stone-50/50 dark:bg-stone-900/40 flex justify-end space-x-3">
                     <button
                       type="button"
                       onClick={() => setShowInviteModal(false)}
-                      className="px-4 py-2 rounded-xl border border-stone-200 dark:border-stone-700 text-xs font-semibold text-stone-600 dark:text-stone-300"
+                      className="px-5 py-2.5 rounded-xl border border-stone-200 dark:border-stone-700 text-sm font-semibold text-stone-700 dark:text-stone-300 hover:bg-stone-100 dark:hover:bg-stone-800 transition-colors"
                     >
                       Cancel
                     </button>
                     <button
                       type="submit"
-                      className="px-4 py-2 rounded-xl bg-[#0062FF] hover:bg-[#0048C6] text-white text-xs font-bold"
+                      className="px-6 py-2.5 rounded-xl bg-[#0062FF] hover:bg-[#0048C6] text-white text-sm font-bold shadow-xs transition-colors"
                     >
-                      Send Invitation
+                      Dispatch Invitation
                     </button>
                   </div>
                 </form>

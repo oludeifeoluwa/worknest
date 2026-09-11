@@ -26,6 +26,7 @@ import {
   PanelLeftClose, 
   Menu,
   ExternalLink,
+  Target,
   X
 } from 'lucide-react';
 import { ActiveSection, Member, OrganizationSettings, UserStatus } from '../types';
@@ -144,7 +145,7 @@ export const NavigationRail: React.FC<NavigationRailProps> = ({
     offline: 'bg-stone-400'
   };
 
-  // 4 Core Permanent Visible Destinations
+  // Core Permanent Visible Destinations
   const primaryNavItems = [
     {
       id: 'home' as ActiveSection,
@@ -152,6 +153,13 @@ export const NavigationRail: React.FC<NavigationRailProps> = ({
       icon: Home,
       badge: null,
       isActive: activeSection === 'home'
+    },
+    {
+      id: 'tasks' as ActiveSection,
+      label: 'Work & Tasks',
+      icon: Target,
+      badge: null,
+      isActive: activeSection === 'tasks' || activeSection === 'work'
     },
     {
       id: 'messages' as ActiveSection,
@@ -177,7 +185,7 @@ export const NavigationRail: React.FC<NavigationRailProps> = ({
   ];
 
   // Secondary items accessed exclusively through MORE
-  const isSecondaryActive = ['channels', 'email', 'files', 'people', 'plugins', 'settings', 'tasks'].includes(activeSection);
+  const isSecondaryActive = ['channels', 'email', 'files', 'people', 'plugins', 'settings'].includes(activeSection);
   const secondaryUnreadTotal = unreadChannelsCount + unreadEmailsCount;
 
   const handleSelectNav = (sec: ActiveSection) => {

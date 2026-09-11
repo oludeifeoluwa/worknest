@@ -765,138 +765,154 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
       {/* EVENT DETAILS DRAWER / MODAL */}
       {selectedEvent && (
         <div 
-          className="fixed inset-0 z-50 bg-black/50 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4"
+          className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4 sm:p-6 md:p-8 overflow-y-auto"
           onClick={() => setSelectedEvent(null)}
         >
           <div 
-            className="w-full max-w-lg bg-white dark:bg-[#0F172A] rounded-2xl border border-stone-200 dark:border-stone-800 shadow-2xl p-5 sm:p-6 space-y-5 animate-scale-in"
+            className="w-full max-w-xl bg-white dark:bg-[#111726] rounded-2xl sm:rounded-3xl border border-stone-200 dark:border-stone-800 shadow-2xl overflow-hidden flex flex-col max-h-[88vh] my-6 animate-scale-in"
             onClick={e => e.stopPropagation()}
           >
             {/* Modal Header */}
-            <div className="flex items-start justify-between">
-              <div className="space-y-1">
-                <span className="text-xs font-bold px-2 py-0.5 rounded-md bg-stone-100 dark:bg-stone-800 text-stone-700 dark:text-stone-300">
-                  {selectedEvent.startDate} • {selectedEvent.startTime} - {selectedEvent.endTime}
-                </span>
-                <h3 className="text-lg font-bold text-stone-900 dark:text-white">
+            <div className="px-6 sm:px-8 py-5 sm:py-6 border-b border-stone-100 dark:border-stone-800/80 bg-stone-50/70 dark:bg-stone-900/60 flex items-start justify-between shrink-0">
+              <div className="space-y-1.5 min-w-0 pr-4">
+                <div className="inline-flex items-center space-x-2 px-2.5 py-1 rounded-lg bg-blue-50 dark:bg-blue-950/60 text-[#0062FF] dark:text-blue-400 text-xs font-semibold">
+                  <CalendarIcon className="w-3.5 h-3.5" />
+                  <span>{selectedEvent.startDate} • {selectedEvent.startTime} - {selectedEvent.endTime}</span>
+                </div>
+                <h3 className="text-lg sm:text-xl font-bold text-stone-900 dark:text-stone-100 break-words">
                   {selectedEvent.title}
                 </h3>
               </div>
               <button
                 onClick={() => setSelectedEvent(null)}
-                className="p-1 rounded-lg text-stone-400 hover:text-stone-700 dark:hover:text-stone-200"
+                className="p-2 rounded-xl text-stone-400 hover:text-stone-700 dark:hover:text-stone-200 hover:bg-stone-100 dark:hover:bg-stone-800 transition-colors shrink-0"
               >
                 <X className="w-5 h-5" />
               </button>
             </div>
 
-            {/* Description */}
-            {selectedEvent.description && (
-              <p className="text-xs text-stone-600 dark:text-stone-300 whitespace-pre-line leading-relaxed">
-                {selectedEvent.description}
-              </p>
-            )}
-
-            {/* Meta details */}
-            <div className="grid grid-cols-2 gap-3 text-xs">
-              <div className="p-3 rounded-xl bg-stone-50 dark:bg-stone-900 border border-stone-200 dark:border-stone-800 space-y-1">
-                <span className="text-[10px] uppercase font-bold text-stone-400 block">Visibility</span>
-                <span className="font-semibold text-stone-800 dark:text-stone-200 capitalize">
-                  {selectedEvent.visibility} {selectedEvent.department ? `(${selectedEvent.department})` : ''}
-                </span>
-              </div>
-              <div className="p-3 rounded-xl bg-stone-50 dark:bg-stone-900 border border-stone-200 dark:border-stone-800 space-y-1">
-                <span className="text-[10px] uppercase font-bold text-stone-400 block">Location</span>
-                <span className="font-semibold text-stone-800 dark:text-stone-200">
-                  {selectedEvent.location || 'Online'}
-                </span>
-              </div>
-            </div>
-
-            {/* Participants list & RSVP status */}
-            <div className="space-y-2">
-              <span className="text-xs font-bold text-stone-700 dark:text-stone-300 block">
-                Participants ({(selectedEvent.participants || []).length})
-              </span>
-              <div className="max-h-36 overflow-y-auto space-y-1.5 scrollbar-thin">
-                {(selectedEvent.participants || []).map(p => (
-                  <div key={p.userId} className="flex items-center justify-between text-xs p-2 rounded-lg bg-stone-50 dark:bg-stone-900/60">
-                    <span className="font-medium text-stone-800 dark:text-stone-200">
-                      {p.name} {p.userId === currentUser.id ? '(You)' : ''}
-                    </span>
-                    <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full capitalize ${
-                      p.status === 'accepted' ? 'bg-emerald-100 dark:bg-emerald-950 text-emerald-600' :
-                      p.status === 'declined' ? 'bg-rose-100 dark:bg-rose-950 text-rose-600' :
-                      'bg-stone-200 dark:bg-stone-800 text-stone-600'
-                    }`}>
-                      {p.status}
-                    </span>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* Video Meeting Callout */}
-            {selectedEvent.hasMeeting && (
-              <div className="p-3.5 rounded-xl bg-blue-50 dark:bg-blue-950/40 border border-blue-200 dark:border-blue-900 flex items-center justify-between">
-                <div className="flex items-center space-x-2">
-                  <Video className="w-5 h-5 text-[#0062FF]" />
-                  <div>
-                    <h5 className="text-xs font-bold text-stone-900 dark:text-white">WorkNest Video Room Attached</h5>
-                    <p className="text-[10px] text-stone-500">Room: {selectedEvent.meetingId || selectedEvent.id}</p>
-                  </div>
+            {/* Modal Content */}
+            <div className="px-6 sm:px-8 py-6 space-y-6 flex-1 overflow-y-auto text-sm">
+              {/* Description */}
+              {selectedEvent.description && (
+                <div>
+                  <label className="text-xs font-bold uppercase tracking-wider text-stone-500 dark:text-stone-400 block mb-2">
+                    Agenda & Deliberation Outline
+                  </label>
+                  <p className="text-sm text-stone-700 dark:text-stone-300 whitespace-pre-line leading-relaxed p-4 rounded-2xl bg-stone-50/50 dark:bg-stone-900/50 border border-stone-200/60 dark:border-stone-800/60">
+                    {selectedEvent.description}
+                  </p>
                 </div>
-                <button
-                  onClick={() => {
-                    if (onStartMeeting) {
-                      onStartMeeting(selectedEvent.meetingId || selectedEvent.id, selectedEvent.title);
-                    }
-                  }}
-                  className="px-3.5 py-1.5 rounded-xl bg-[#0062FF] hover:bg-[#0048C6] text-white text-xs font-bold shadow-xs flex items-center space-x-1 cursor-pointer"
-                >
-                  <Video className="w-4 h-4" />
-                  <span>Enter Room</span>
-                </button>
-              </div>
-            )}
+              )}
 
-            {/* Action Bar */}
-            <div className="pt-3 border-t border-stone-200 dark:border-stone-800 flex items-center justify-between">
+              {/* Meta details */}
+              <div className="grid grid-cols-2 gap-4">
+                <div className="p-4 rounded-2xl bg-stone-50/60 dark:bg-stone-900/50 border border-stone-200/70 dark:border-stone-800/70 space-y-1">
+                  <span className="text-xs uppercase font-bold text-stone-400 block">Visibility</span>
+                  <span className="font-semibold text-stone-800 dark:text-stone-200 capitalize text-sm">
+                    {selectedEvent.visibility} {selectedEvent.department ? `(${selectedEvent.department})` : ''}
+                  </span>
+                </div>
+                <div className="p-4 rounded-2xl bg-stone-50/60 dark:bg-stone-900/50 border border-stone-200/70 dark:border-stone-800/70 space-y-1">
+                  <span className="text-xs uppercase font-bold text-stone-400 block">Location</span>
+                  <span className="font-semibold text-stone-800 dark:text-stone-200 text-sm">
+                    {selectedEvent.location || 'Online Session'}
+                  </span>
+                </div>
+              </div>
+
+              {/* Participants list & RSVP status */}
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-bold uppercase tracking-wider text-stone-500 dark:text-stone-400">
+                    Invited Officers & Deliberators
+                  </span>
+                  <span className="text-xs font-semibold text-stone-500">
+                    {(selectedEvent.participants || []).length} participants
+                  </span>
+                </div>
+                <div className="max-h-44 overflow-y-auto space-y-2 pr-1">
+                  {(selectedEvent.participants || []).map(p => (
+                    <div key={p.userId} className="flex items-center justify-between p-3 rounded-xl bg-stone-50/70 dark:bg-stone-900/50 border border-stone-200/60 dark:border-stone-800/60">
+                      <span className="font-medium text-stone-800 dark:text-stone-200 text-sm">
+                        {p.name} {p.userId === currentUser.id ? '(You)' : ''}
+                      </span>
+                      <span className={`text-xs font-bold px-3 py-1 rounded-full capitalize ${
+                        p.status === 'accepted' ? 'bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800/60' :
+                        p.status === 'declined' ? 'bg-rose-50 dark:bg-rose-950/60 text-rose-600 dark:text-rose-400 border border-rose-200 dark:border-rose-800/60' :
+                        'bg-stone-100 dark:bg-stone-800 text-stone-600 dark:text-stone-400'
+                      }`}>
+                        {p.status}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Video Meeting Callout */}
+              {selectedEvent.hasMeeting && (
+                <div className="p-4 rounded-2xl bg-blue-50/80 dark:bg-blue-950/40 border border-blue-200 dark:border-blue-900 flex items-center justify-between gap-4">
+                  <div className="flex items-center space-x-3 min-w-0">
+                    <div className="w-10 h-10 rounded-xl bg-[#0062FF] text-white flex items-center justify-center shrink-0 shadow-xs">
+                      <Video className="w-5 h-5" />
+                    </div>
+                    <div className="min-w-0">
+                      <h5 className="text-sm font-bold text-stone-900 dark:text-white truncate">WorkNest Video Room Attached</h5>
+                      <p className="text-xs text-stone-500 truncate">Chamber ID: {selectedEvent.meetingId || selectedEvent.id}</p>
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => {
+                      if (onStartMeeting) {
+                        onStartMeeting(selectedEvent.meetingId || selectedEvent.id, selectedEvent.title);
+                      }
+                    }}
+                    className="px-4 py-2.5 rounded-xl bg-[#0062FF] hover:bg-[#0048C6] text-white text-xs font-bold shadow-xs flex items-center space-x-1.5 shrink-0 cursor-pointer transition-colors"
+                  >
+                    <Video className="w-4 h-4" />
+                    <span>Enter Chamber</span>
+                  </button>
+                </div>
+              )}
+            </div>
+
+            {/* Action Bar / Footer */}
+            <div className="px-6 sm:px-8 py-4 sm:py-5 border-t border-stone-100 dark:border-stone-800/80 bg-stone-50/50 dark:bg-stone-900/40 flex items-center justify-between shrink-0">
               {/* Creator Edit/Delete */}
               {selectedEvent.creatorId === currentUser.id ? (
                 <div className="flex items-center space-x-2">
                   <button
                     onClick={() => handleOpenEditModal(selectedEvent)}
-                    className="px-3 py-1.5 text-xs font-semibold rounded-lg border border-stone-200 dark:border-stone-800 text-stone-700 dark:text-stone-300 hover:bg-stone-100 flex items-center space-x-1 cursor-pointer"
+                    className="px-4 py-2 text-xs font-semibold rounded-xl border border-stone-200 dark:border-stone-700 text-stone-700 dark:text-stone-300 hover:bg-stone-100 dark:hover:bg-stone-800 flex items-center space-x-1.5 transition-colors cursor-pointer"
                   >
                     <Edit3 className="w-3.5 h-3.5" />
                     <span>Edit</span>
                   </button>
                   <button
                     onClick={() => handleDeleteEvent(selectedEvent.id)}
-                    className="px-3 py-1.5 text-xs font-semibold rounded-lg border border-rose-200 dark:border-rose-900 text-rose-600 hover:bg-rose-50 flex items-center space-x-1 cursor-pointer"
+                    className="px-4 py-2 text-xs font-semibold rounded-xl border border-rose-200 dark:border-rose-900 text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/40 flex items-center space-x-1.5 transition-colors cursor-pointer"
                   >
                     <Trash2 className="w-3.5 h-3.5" />
                     <span>Delete</span>
                   </button>
                 </div>
               ) : (
-                <div className="text-[11px] text-stone-400">
+                <div className="text-xs text-stone-400">
                   Organized by {selectedEvent.creatorName}
                 </div>
               )}
 
               {/* RSVP controls */}
-              <div className="flex items-center space-x-2">
+              <div className="flex items-center space-x-2.5">
                 <button
                   onClick={() => handleRSVP(selectedEvent.id, 'accepted')}
-                  className="px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold cursor-pointer"
+                  className="px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold shadow-xs transition-colors cursor-pointer"
                 >
-                  Accept
+                  Accept RSVP
                 </button>
                 <button
                   onClick={() => handleRSVP(selectedEvent.id, 'declined')}
-                  className="px-3 py-1.5 rounded-xl border border-stone-200 dark:border-stone-800 text-stone-600 dark:text-stone-400 hover:bg-stone-100 text-xs font-semibold cursor-pointer"
+                  className="px-4 py-2.5 rounded-xl border border-stone-200 dark:border-stone-700 text-stone-600 dark:text-stone-400 hover:bg-stone-100 dark:hover:bg-stone-800 text-xs font-semibold transition-colors cursor-pointer"
                 >
                   Decline
                 </button>
@@ -910,230 +926,250 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
       {/* CREATE / EDIT EVENT FORM MODAL */}
       {isEventModalOpen && (
         <div 
-          className="fixed inset-0 z-50 bg-black/50 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4 overflow-y-auto"
+          className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4 sm:p-6 md:p-8 overflow-y-auto"
           onClick={() => setIsEventModalOpen(false)}
         >
           <div 
-            className="w-full max-w-xl bg-white dark:bg-[#0F172A] rounded-2xl border border-stone-200 dark:border-stone-800 shadow-2xl p-5 sm:p-6 space-y-4 my-8 animate-scale-in"
+            className="w-full max-w-2xl bg-white dark:bg-[#111726] rounded-2xl sm:rounded-3xl border border-stone-200 dark:border-stone-800 shadow-2xl overflow-hidden flex flex-col max-h-[90vh] my-6 animate-scale-in"
             onClick={e => e.stopPropagation()}
           >
-            <div className="flex items-center justify-between pb-2 border-b border-stone-200 dark:border-stone-800">
-              <h3 className="text-base font-bold text-stone-900 dark:text-white">
-                {editingEventId ? 'Edit Calendar Event' : 'Schedule Event / Meeting'}
-              </h3>
+            {/* Header */}
+            <div className="px-6 sm:px-8 py-5 sm:py-6 border-b border-stone-100 dark:border-stone-800/80 bg-stone-50/70 dark:bg-stone-900/60 flex items-center justify-between shrink-0">
+              <div className="flex items-center space-x-3.5">
+                <div className="w-10 h-10 rounded-xl sm:rounded-2xl bg-blue-50 dark:bg-blue-950/60 text-[#0062FF] dark:text-blue-400 flex items-center justify-center shrink-0 border border-blue-100 dark:border-blue-900/40 shadow-xs">
+                  <CalendarIcon className="w-5 h-5" />
+                </div>
+                <div>
+                  <h3 className="text-base sm:text-lg font-bold text-stone-900 dark:text-stone-100">
+                    {editingEventId ? 'Edit Scheduled Event' : 'Schedule Event / Deliberation'}
+                  </h3>
+                  <p className="text-xs text-stone-500 dark:text-stone-400 mt-0.5">
+                    Configure timeline, video chambers, and accountable participants
+                  </p>
+                </div>
+              </div>
               <button
                 onClick={() => setIsEventModalOpen(false)}
-                className="p-1 rounded-lg text-stone-400 hover:text-stone-700 dark:hover:text-stone-200"
+                className="p-2 rounded-xl text-stone-400 hover:text-stone-700 dark:hover:text-stone-200 hover:bg-stone-100 dark:hover:bg-stone-800 transition-colors"
               >
                 <X className="w-5 h-5" />
               </button>
             </div>
 
-            <form onSubmit={handleSaveEvent} className="space-y-4 text-xs">
-              
-              {/* Event Title */}
-              <div className="space-y-1">
-                <label className="font-bold text-stone-700 dark:text-stone-300">
-                  Event Title *
-                </label>
-                <input
-                  type="text"
-                  required
-                  placeholder="e.g. Quarterly Strategic Briefing"
-                  value={formTitle}
-                  onChange={e => setFormTitle(e.target.value)}
-                  className="w-full p-2.5 rounded-xl bg-stone-50 dark:bg-stone-900 border border-stone-200 dark:border-stone-800 text-stone-900 dark:text-white focus:outline-none focus:border-[#0062FF]"
-                />
-              </div>
-
-              {/* Date & Time Range */}
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
-                <div className="space-y-1">
-                  <label className="font-bold text-stone-700 dark:text-stone-300">Start Date</label>
-                  <input
-                    type="date"
-                    required
-                    value={formStartDate}
-                    onChange={e => setFormStartDate(e.target.value)}
-                    className="w-full p-2 rounded-xl bg-stone-50 dark:bg-stone-900 border border-stone-200 dark:border-stone-800 text-stone-900 dark:text-white"
-                  />
-                </div>
-                <div className="space-y-1">
-                  <label className="font-bold text-stone-700 dark:text-stone-300">Start Time</label>
-                  <input
-                    type="time"
-                    required
-                    value={formStartTime}
-                    onChange={e => setFormStartTime(e.target.value)}
-                    className="w-full p-2 rounded-xl bg-stone-50 dark:bg-stone-900 border border-stone-200 dark:border-stone-800 text-stone-900 dark:text-white"
-                  />
-                </div>
-                <div className="space-y-1">
-                  <label className="font-bold text-stone-700 dark:text-stone-300">End Date</label>
-                  <input
-                    type="date"
-                    required
-                    value={formEndDate}
-                    onChange={e => setFormEndDate(e.target.value)}
-                    className="w-full p-2 rounded-xl bg-stone-50 dark:bg-stone-900 border border-stone-200 dark:border-stone-800 text-stone-900 dark:text-white"
-                  />
-                </div>
-                <div className="space-y-1">
-                  <label className="font-bold text-stone-700 dark:text-stone-300">End Time</label>
-                  <input
-                    type="time"
-                    required
-                    value={formEndTime}
-                    onChange={e => setFormEndTime(e.target.value)}
-                    className="w-full p-2 rounded-xl bg-stone-50 dark:bg-stone-900 border border-stone-200 dark:border-stone-800 text-stone-900 dark:text-white"
-                  />
-                </div>
-              </div>
-
-              {/* WorkNest Video Room Toggle */}
-              <div className="p-3 rounded-xl bg-blue-50/60 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-900/60 flex items-center justify-between">
-                <div className="flex items-center space-x-2">
-                  <Video className="w-4 h-4 text-[#0062FF]" />
-                  <div>
-                    <span className="font-bold text-stone-900 dark:text-white block">
-                      Attach Built-in WorkNest Video Meeting
-                    </span>
-                    <span className="text-[10px] text-stone-500">
-                      Creates an instant encrypted browser-based meeting room for all participants
-                    </span>
-                  </div>
-                </div>
-                <input
-                  type="checkbox"
-                  checked={formHasMeeting}
-                  onChange={e => setFormHasMeeting(e.target.checked)}
-                  className="w-4 h-4 rounded text-[#0062FF] focus:ring-[#0062FF] cursor-pointer"
-                />
-              </div>
-
-              {/* Location & Visibility */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <div className="space-y-1">
-                  <label className="font-bold text-stone-700 dark:text-stone-300">Physical Location / Room (Optional)</label>
+            <form onSubmit={handleSaveEvent} className="flex flex-col flex-1 min-h-0 overflow-hidden">
+              <div className="px-6 sm:px-8 py-6 space-y-6 flex-1 overflow-y-auto text-sm">
+                
+                {/* Event Title */}
+                <div>
+                  <label className="text-xs font-bold uppercase tracking-wider text-stone-600 dark:text-stone-400 block mb-2">
+                    Event Title <span className="text-rose-500">*</span>
+                  </label>
                   <input
                     type="text"
-                    placeholder="e.g. Conference Room A or Online"
-                    value={formLocation}
-                    onChange={e => setFormLocation(e.target.value)}
-                    className="w-full p-2 rounded-xl bg-stone-50 dark:bg-stone-900 border border-stone-200 dark:border-stone-800 text-stone-900 dark:text-white"
+                    required
+                    placeholder="e.g. Quarterly Strategic Council Review"
+                    value={formTitle}
+                    onChange={e => setFormTitle(e.target.value)}
+                    className="w-full px-4 py-3 rounded-xl sm:rounded-2xl bg-stone-50/50 dark:bg-stone-900/50 border border-stone-200 dark:border-stone-700/80 text-stone-900 dark:text-white focus:outline-none focus:border-[#0062FF] focus:ring-2 focus:ring-[#0062FF]/20 transition-all font-semibold"
                   />
                 </div>
 
-                <div className="space-y-1">
-                  <label className="font-bold text-stone-700 dark:text-stone-300">Visibility & Permissions</label>
-                  <select
-                    value={formVisibility}
-                    onChange={e => setFormVisibility(e.target.value as any)}
-                    className="w-full p-2 rounded-xl bg-stone-50 dark:bg-stone-900 border border-stone-200 dark:border-stone-800 text-stone-900 dark:text-white"
-                  >
-                    <option value="organization">Organization-Wide</option>
-                    <option value="department">Department Only ({formDepartment})</option>
-                    <option value="private">Private (Invited Only)</option>
-                  </select>
-                </div>
-              </div>
-
-              {/* Invite Participants Multi-Select */}
-              <div className="space-y-1">
-                <label className="font-bold text-stone-700 dark:text-stone-300">
-                  Invite Participants ({formSelectedParticipants.length} selected)
-                </label>
-                <div className="max-h-28 overflow-y-auto p-2 rounded-xl bg-stone-50 dark:bg-stone-900 border border-stone-200 dark:border-stone-800 grid grid-cols-2 gap-1.5 scrollbar-thin">
-                  {members.filter(m => m.id !== currentUser.id).map(mem => {
-                    const isSelected = formSelectedParticipants.includes(mem.id);
-                    return (
-                      <button
-                        key={mem.id}
-                        type="button"
-                        onClick={() => {
-                          if (isSelected) {
-                            setFormSelectedParticipants(prev => prev.filter(id => id !== mem.id));
-                          } else {
-                            setFormSelectedParticipants(prev => [...prev, mem.id]);
-                          }
-                        }}
-                        className={`p-1.5 rounded-lg text-left text-xs flex items-center space-x-2 transition-colors cursor-pointer ${
-                          isSelected ? 'bg-blue-100 dark:bg-blue-900/60 text-[#0062FF] font-semibold' : 'hover:bg-stone-200/50 text-stone-700 dark:text-stone-300'
-                        }`}
-                      >
-                        <span className={`w-3.5 h-3.5 rounded-full border flex items-center justify-center text-[8px] ${
-                          isSelected ? 'bg-[#0062FF] border-[#0062FF] text-white' : 'border-stone-400'
-                        }`}>
-                          {isSelected && '✓'}
-                        </span>
-                        <span className="truncate">{mem.name}</span>
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-
-              {/* Description */}
-              <div className="space-y-1">
-                <label className="font-bold text-stone-700 dark:text-stone-300">Description & Agenda</label>
-                <textarea
-                  rows={3}
-                  placeholder="Outline key meeting goals, agenda items, or notes..."
-                  value={formDescription}
-                  onChange={e => setFormDescription(e.target.value)}
-                  className="w-full p-2.5 rounded-xl bg-stone-50 dark:bg-stone-900 border border-stone-200 dark:border-stone-800 text-stone-900 dark:text-white"
-                />
-              </div>
-
-              {/* Reminder & Color */}
-              <div className="grid grid-cols-2 gap-3">
-                <div className="space-y-1">
-                  <label className="font-bold text-stone-700 dark:text-stone-300">Notification Reminder</label>
-                  <select
-                    value={formReminder}
-                    onChange={e => setFormReminder(Number(e.target.value))}
-                    className="w-full p-2 rounded-xl bg-stone-50 dark:bg-stone-900 border border-stone-200 dark:border-stone-800 text-stone-900 dark:text-white"
-                  >
-                    <option value={5}>5 minutes before</option>
-                    <option value={10}>10 minutes before</option>
-                    <option value={15}>15 minutes before</option>
-                    <option value={30}>30 minutes before</option>
-                    <option value={60}>1 hour before</option>
-                    <option value={1440}>1 day before</option>
-                  </select>
-                </div>
-
-                <div className="space-y-1">
-                  <label className="font-bold text-stone-700 dark:text-stone-300">Color Tag</label>
-                  <div className="flex items-center space-x-2 pt-1">
-                    {['#0062FF', '#10B981', '#8B5CF6', '#F59E0B', '#EF4444', '#06B6D4'].map(color => (
-                      <button
-                        key={color}
-                        type="button"
-                        onClick={() => setFormColorTag(color)}
-                        style={{ backgroundColor: color }}
-                        className={`w-6 h-6 rounded-full transition-transform cursor-pointer ${
-                          formColorTag === color ? 'scale-125 ring-2 ring-offset-2 ring-blue-500' : 'opacity-80 hover:opacity-100'
-                        }`}
-                      />
-                    ))}
+                {/* Date & Time Range */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+                  <div>
+                    <label className="text-xs font-bold uppercase tracking-wider text-stone-600 dark:text-stone-400 block mb-1.5">Start Date</label>
+                    <input
+                      type="date"
+                      required
+                      value={formStartDate}
+                      onChange={e => setFormStartDate(e.target.value)}
+                      className="w-full px-3 py-2.5 rounded-xl bg-stone-50/50 dark:bg-stone-900/50 border border-stone-200 dark:border-stone-700/80 text-stone-900 dark:text-white text-xs focus:outline-none focus:border-[#0062FF]"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-xs font-bold uppercase tracking-wider text-stone-600 dark:text-stone-400 block mb-1.5">Start Time</label>
+                    <input
+                      type="time"
+                      required
+                      value={formStartTime}
+                      onChange={e => setFormStartTime(e.target.value)}
+                      className="w-full px-3 py-2.5 rounded-xl bg-stone-50/50 dark:bg-stone-900/50 border border-stone-200 dark:border-stone-700/80 text-stone-900 dark:text-white text-xs focus:outline-none focus:border-[#0062FF]"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-xs font-bold uppercase tracking-wider text-stone-600 dark:text-stone-400 block mb-1.5">End Date</label>
+                    <input
+                      type="date"
+                      required
+                      value={formEndDate}
+                      onChange={e => setFormEndDate(e.target.value)}
+                      className="w-full px-3 py-2.5 rounded-xl bg-stone-50/50 dark:bg-stone-900/50 border border-stone-200 dark:border-stone-700/80 text-stone-900 dark:text-white text-xs focus:outline-none focus:border-[#0062FF]"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-xs font-bold uppercase tracking-wider text-stone-600 dark:text-stone-400 block mb-1.5">End Time</label>
+                    <input
+                      type="time"
+                      required
+                      value={formEndTime}
+                      onChange={e => setFormEndTime(e.target.value)}
+                      className="w-full px-3 py-2.5 rounded-xl bg-stone-50/50 dark:bg-stone-900/50 border border-stone-200 dark:border-stone-700/80 text-stone-900 dark:text-white text-xs focus:outline-none focus:border-[#0062FF]"
+                    />
                   </div>
                 </div>
+
+                {/* WorkNest Video Room Toggle */}
+                <div className="p-4 rounded-2xl bg-blue-50/60 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-900/60 flex items-center justify-between gap-4">
+                  <div className="flex items-center space-x-3">
+                    <div className="w-10 h-10 rounded-xl bg-[#0062FF] text-white flex items-center justify-center shrink-0 shadow-xs">
+                      <Video className="w-5 h-5" />
+                    </div>
+                    <div>
+                      <span className="font-bold text-stone-900 dark:text-white block text-sm">
+                        Attach Built-in WorkNest Video Meeting
+                      </span>
+                      <span className="text-xs text-stone-500 dark:text-stone-400">
+                        Creates an instant encrypted browser-based meeting room for all participants
+                      </span>
+                    </div>
+                  </div>
+                  <input
+                    type="checkbox"
+                    checked={formHasMeeting}
+                    onChange={e => setFormHasMeeting(e.target.checked)}
+                    className="w-5 h-5 rounded text-[#0062FF] focus:ring-[#0062FF] cursor-pointer shrink-0"
+                  />
+                </div>
+
+                {/* Location & Visibility */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <label className="text-xs font-bold uppercase tracking-wider text-stone-600 dark:text-stone-400 block mb-2">Physical Location / Room</label>
+                    <input
+                      type="text"
+                      placeholder="e.g. Council Chamber B or Online"
+                      value={formLocation}
+                      onChange={e => setFormLocation(e.target.value)}
+                      className="w-full px-4 py-2.5 rounded-xl bg-stone-50/50 dark:bg-stone-900/50 border border-stone-200 dark:border-stone-700/80 text-stone-900 dark:text-white text-sm focus:outline-none focus:border-[#0062FF]"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="text-xs font-bold uppercase tracking-wider text-stone-600 dark:text-stone-400 block mb-2">Visibility & Scope</label>
+                    <select
+                      value={formVisibility}
+                      onChange={e => setFormVisibility(e.target.value as any)}
+                      className="w-full px-4 py-2.5 rounded-xl bg-stone-50/50 dark:bg-stone-900/50 border border-stone-200 dark:border-stone-700/80 text-stone-900 dark:text-white text-sm focus:outline-none focus:border-[#0062FF]"
+                    >
+                      <option value="organization">Organization-Wide</option>
+                      <option value="department">Department Only ({formDepartment})</option>
+                      <option value="private">Private (Invited Officers Only)</option>
+                    </select>
+                  </div>
+                </div>
+
+                {/* Invite Participants Multi-Select */}
+                <div>
+                  <div className="flex items-center justify-between mb-2">
+                    <label className="text-xs font-bold uppercase tracking-wider text-stone-600 dark:text-stone-400">
+                      Invite Officers ({formSelectedParticipants.length} selected)
+                    </label>
+                  </div>
+                  <div className="max-h-36 overflow-y-auto p-3 rounded-2xl bg-stone-50/50 dark:bg-stone-900/50 border border-stone-200 dark:border-stone-700/80 grid grid-cols-1 sm:grid-cols-2 gap-2 scrollbar-thin">
+                    {members.filter(m => m.id !== currentUser.id).map(mem => {
+                      const isSelected = formSelectedParticipants.includes(mem.id);
+                      return (
+                        <button
+                          key={mem.id}
+                          type="button"
+                          onClick={() => {
+                            if (isSelected) {
+                              setFormSelectedParticipants(prev => prev.filter(id => id !== mem.id));
+                            } else {
+                              setFormSelectedParticipants(prev => [...prev, mem.id]);
+                            }
+                          }}
+                          className={`p-2.5 rounded-xl text-left text-xs flex items-center space-x-2.5 transition-all cursor-pointer ${
+                            isSelected 
+                              ? 'bg-blue-50 dark:bg-blue-950/60 text-[#0062FF] font-bold border border-blue-200 dark:border-blue-850' 
+                              : 'bg-white dark:bg-stone-950/40 hover:bg-stone-100 dark:hover:bg-stone-800 text-stone-700 dark:text-stone-300 border border-stone-200/60 dark:border-stone-800/60'
+                          }`}
+                        >
+                          <span className={`w-4 h-4 rounded-full border flex items-center justify-center text-[10px] shrink-0 ${
+                            isSelected ? 'bg-[#0062FF] border-[#0062FF] text-white' : 'border-stone-400'
+                          }`}>
+                            {isSelected && '✓'}
+                          </span>
+                          <span className="truncate">{mem.name}</span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                {/* Description */}
+                <div>
+                  <label className="text-xs font-bold uppercase tracking-wider text-stone-600 dark:text-stone-400 block mb-2">Description & Agenda</label>
+                  <textarea
+                    rows={3}
+                    placeholder="Outline key meeting goals, agenda items, or notes..."
+                    value={formDescription}
+                    onChange={e => setFormDescription(e.target.value)}
+                    className="w-full px-4 py-3 rounded-xl sm:rounded-2xl bg-stone-50/50 dark:bg-stone-900/50 border border-stone-200 dark:border-stone-700/80 text-stone-900 dark:text-white text-sm focus:outline-none focus:border-[#0062FF] transition-all resize-none leading-relaxed"
+                  />
+                </div>
+
+                {/* Reminder & Color */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <label className="text-xs font-bold uppercase tracking-wider text-stone-600 dark:text-stone-400 block mb-2">Notification Reminder</label>
+                    <select
+                      value={formReminder}
+                      onChange={e => setFormReminder(Number(e.target.value))}
+                      className="w-full px-4 py-2.5 rounded-xl bg-stone-50/50 dark:bg-stone-900/50 border border-stone-200 dark:border-stone-700/80 text-stone-900 dark:text-white text-sm focus:outline-none focus:border-[#0062FF]"
+                    >
+                      <option value={5}>5 minutes before</option>
+                      <option value={10}>10 minutes before</option>
+                      <option value={15}>15 minutes before</option>
+                      <option value={30}>30 minutes before</option>
+                      <option value={60}>1 hour before</option>
+                      <option value={1440}>1 day before</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="text-xs font-bold uppercase tracking-wider text-stone-600 dark:text-stone-400 block mb-2">Category Color Tag</label>
+                    <div className="flex items-center space-x-3 pt-1">
+                      {['#0062FF', '#10B981', '#8B5CF6', '#F59E0B', '#EF4444', '#06B6D4'].map(color => (
+                        <button
+                          key={color}
+                          type="button"
+                          onClick={() => setFormColorTag(color)}
+                          style={{ backgroundColor: color }}
+                          className={`w-7 h-7 rounded-full transition-transform cursor-pointer ${
+                            formColorTag === color ? 'scale-110 ring-2 ring-offset-2 ring-[#0062FF]' : 'opacity-80 hover:opacity-100'
+                          }`}
+                        />
+                      ))}
+                    </div>
+                  </div>
+                </div>
+
               </div>
 
-              {/* Submit Buttons */}
-              <div className="pt-3 border-t border-stone-200 dark:border-stone-800 flex items-center justify-end space-x-2.5">
+              {/* Submit Buttons / Footer */}
+              <div className="px-6 sm:px-8 py-4 sm:py-5 border-t border-stone-100 dark:border-stone-800/80 bg-stone-50/50 dark:bg-stone-900/40 flex items-center justify-end space-x-3 shrink-0">
                 <button
                   type="button"
                   onClick={() => setIsEventModalOpen(false)}
-                  className="px-4 py-2 text-xs font-semibold rounded-xl border border-stone-200 dark:border-stone-800 text-stone-600 dark:text-stone-400 hover:bg-stone-100"
+                  className="px-5 py-2.5 text-sm font-semibold rounded-xl border border-stone-200 dark:border-stone-700 text-stone-700 dark:text-stone-300 hover:bg-stone-100 dark:hover:bg-stone-800 transition-colors"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={isSubmitting || !formTitle.trim()}
-                  className="px-5 py-2 text-xs font-bold rounded-xl bg-[#0062FF] hover:bg-[#0048C6] text-white shadow-xs disabled:opacity-40 flex items-center space-x-1.5 cursor-pointer"
+                  className="px-6 py-2.5 text-sm font-bold rounded-xl bg-[#0062FF] hover:bg-[#0048C6] text-white shadow-xs disabled:opacity-40 flex items-center space-x-2 cursor-pointer transition-all"
                 >
                   <CalendarCheck2 className="w-4 h-4" />
                   <span>{isSubmitting ? 'Saving...' : editingEventId ? 'Update Event' : 'Save Event'}</span>

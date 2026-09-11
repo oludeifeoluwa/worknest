@@ -321,84 +321,113 @@ export const MeetingsView: React.FC<MeetingsViewProps> = ({
       {/* CREATE INSTANT MEETING MODAL */}
       {isCreateModalOpen && (
         <div 
-          className="fixed inset-0 z-50 bg-black/50 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4"
+          className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4 sm:p-6 md:p-8 overflow-y-auto"
           onClick={() => setIsCreateModalOpen(false)}
         >
           <div 
-            className="w-full max-w-lg bg-white dark:bg-[#0F172A] rounded-2xl border border-stone-200 dark:border-stone-800 shadow-2xl p-5 sm:p-6 space-y-4 animate-scale-in"
+            className="w-full max-w-xl bg-white dark:bg-[#111726] rounded-2xl sm:rounded-3xl border border-stone-200 dark:border-stone-800 shadow-2xl overflow-hidden flex flex-col max-h-[90vh] my-6 animate-scale-in"
             onClick={e => e.stopPropagation()}
           >
-            <div className="flex items-center justify-between pb-2 border-b border-stone-200 dark:border-stone-800">
-              <h3 className="text-base font-bold text-stone-900 dark:text-white">
-                Launch Instant Video Meeting
-              </h3>
-              <button onClick={() => setIsCreateModalOpen(false)} className="text-stone-400 hover:text-white">
-                ✕
+            {/* Header */}
+            <div className="px-6 sm:px-8 py-5 sm:py-6 border-b border-stone-100 dark:border-stone-800/80 bg-stone-50/70 dark:bg-stone-900/60 flex items-center justify-between shrink-0">
+              <div className="flex items-center space-x-3.5">
+                <div className="w-10 h-10 rounded-xl sm:rounded-2xl bg-blue-50 dark:bg-blue-950/60 text-[#0062FF] dark:text-blue-400 flex items-center justify-center shrink-0 border border-blue-100 dark:border-blue-900/40 shadow-xs">
+                  <Video className="w-5 h-5" />
+                </div>
+                <div>
+                  <h3 className="text-base sm:text-lg font-bold text-stone-900 dark:text-stone-100">
+                    Launch Instant Video Room
+                  </h3>
+                  <p className="text-xs text-stone-500 dark:text-stone-400 mt-0.5">
+                    Spin up an ad-hoc encrypted video consultation chamber
+                  </p>
+                </div>
+              </div>
+              <button 
+                onClick={() => setIsCreateModalOpen(false)} 
+                className="p-2 rounded-xl text-stone-400 hover:text-stone-700 dark:hover:text-stone-200 hover:bg-stone-100 dark:hover:bg-stone-800 transition-colors"
+              >
+                <span className="text-lg leading-none">✕</span>
               </button>
             </div>
 
-            <div className="space-y-3.5 text-xs">
-              <div className="space-y-1">
-                <label className="font-bold text-stone-700 dark:text-stone-300">Meeting Topic / Title</label>
+            {/* Body */}
+            <div className="px-6 sm:px-8 py-6 space-y-5 flex-1 overflow-y-auto text-sm">
+              <div>
+                <label className="text-xs font-bold uppercase tracking-wider text-stone-600 dark:text-stone-400 block mb-2">
+                  Meeting Topic / Title
+                </label>
                 <input
                   type="text"
-                  placeholder="e.g. Ad-hoc Architecture Review"
+                  placeholder="e.g. Ad-hoc Directive Deliberation"
                   value={instantTitle}
                   onChange={e => setInstantTitle(e.target.value)}
-                  className="w-full p-2.5 rounded-xl bg-stone-50 dark:bg-stone-900 border border-stone-200 dark:border-stone-800 text-stone-900 dark:text-white focus:outline-none focus:border-[#0062FF]"
+                  className="w-full px-4 py-3 rounded-xl sm:rounded-2xl bg-stone-50/50 dark:bg-stone-900/50 border border-stone-200 dark:border-stone-700/80 text-stone-900 dark:text-white font-semibold focus:outline-none focus:border-[#0062FF] focus:ring-2 focus:ring-[#0062FF]/20 transition-all text-sm"
                 />
               </div>
 
-              <div className="space-y-1">
-                <label className="font-bold text-stone-700 dark:text-stone-300">Agenda / Context (Optional)</label>
+              <div>
+                <label className="text-xs font-bold uppercase tracking-wider text-stone-600 dark:text-stone-400 block mb-2">
+                  Agenda / Context (Optional)
+                </label>
                 <textarea
-                  rows={2}
-                  placeholder="Short note on what this meeting is about..."
+                  rows={3}
+                  placeholder="Short outline of the key discussion items and expected deliverables..."
                   value={instantDescription}
                   onChange={e => setInstantDescription(e.target.value)}
-                  className="w-full p-2 rounded-xl bg-stone-50 dark:bg-stone-900 border border-stone-200 dark:border-stone-800 text-stone-900 dark:text-white"
+                  className="w-full px-4 py-3 rounded-xl sm:rounded-2xl bg-stone-50/50 dark:bg-stone-900/50 border border-stone-200 dark:border-stone-700/80 text-stone-900 dark:text-white text-sm focus:outline-none focus:border-[#0062FF] resize-none leading-relaxed transition-all"
                 />
               </div>
 
-              <div className="p-3 rounded-xl bg-stone-50 dark:bg-stone-900 border border-stone-200 dark:border-stone-800 space-y-2">
-                <label className="flex items-center justify-between cursor-pointer">
-                  <span className="font-semibold text-stone-800 dark:text-stone-200">Enable Waiting Room</span>
+              <div className="p-4 rounded-2xl bg-stone-50/60 dark:bg-stone-900/50 border border-stone-200/70 dark:border-stone-800/70 space-y-3">
+                <label className="flex items-center justify-between cursor-pointer py-1">
+                  <div>
+                    <span className="font-semibold text-stone-800 dark:text-stone-200 block text-sm">Enable Waiting Room</span>
+                    <span className="text-xs text-stone-500 dark:text-stone-400">Participants must be admitted by the host before entering</span>
+                  </div>
                   <input
                     type="checkbox"
                     checked={isWaitingRoom}
                     onChange={e => setIsWaitingRoom(e.target.checked)}
-                    className="w-4 h-4 rounded text-[#0062FF]"
+                    className="w-5 h-5 rounded text-[#0062FF] focus:ring-[#0062FF] cursor-pointer ml-3 shrink-0"
                   />
                 </label>
-                <label className="flex items-center justify-between cursor-pointer">
-                  <span className="font-semibold text-stone-800 dark:text-stone-200">Private Meeting</span>
+
+                <div className="h-px bg-stone-200/60 dark:bg-stone-800/60" />
+
+                <label className="flex items-center justify-between cursor-pointer py-1">
+                  <div>
+                    <span className="font-semibold text-stone-800 dark:text-stone-200 block text-sm">Private Meeting</span>
+                    <span className="text-xs text-stone-500 dark:text-stone-400">Restricted to direct invitees only</span>
+                  </div>
                   <input
                     type="checkbox"
                     checked={isPrivate}
                     onChange={e => setIsPrivate(e.target.checked)}
-                    className="w-4 h-4 rounded text-[#0062FF]"
+                    className="w-5 h-5 rounded text-[#0062FF] focus:ring-[#0062FF] cursor-pointer ml-3 shrink-0"
                   />
                 </label>
               </div>
+            </div>
 
-              <div className="pt-3 border-t border-stone-200 dark:border-stone-800 flex items-center justify-end space-x-2">
-                <button
-                  type="button"
-                  onClick={() => setIsCreateModalOpen(false)}
-                  className="px-4 py-2 rounded-xl border border-stone-200 dark:border-stone-800 text-stone-600 dark:text-stone-400"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="button"
-                  disabled={isSubmitting}
-                  onClick={handleStartInstant}
-                  className="px-5 py-2 rounded-xl bg-[#0062FF] hover:bg-[#0048C6] text-white font-bold shadow-xs flex items-center space-x-1.5 cursor-pointer"
-                >
-                  <Video className="w-4 h-4" />
-                  <span>{isSubmitting ? 'Starting...' : 'Enter Video Room'}</span>
-                </button>
-              </div>
+            {/* Footer */}
+            <div className="px-6 sm:px-8 py-4 sm:py-5 border-t border-stone-100 dark:border-stone-800/80 bg-stone-50/50 dark:bg-stone-900/40 flex items-center justify-end space-x-3 shrink-0">
+              <button
+                type="button"
+                onClick={() => setIsCreateModalOpen(false)}
+                className="px-5 py-2.5 rounded-xl border border-stone-200 dark:border-stone-700 text-stone-700 dark:text-stone-300 hover:bg-stone-100 dark:hover:bg-stone-800 text-sm font-semibold transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                disabled={isSubmitting}
+                onClick={handleStartInstant}
+                className="px-6 py-2.5 rounded-xl bg-[#0062FF] hover:bg-[#0048C6] text-white text-sm font-bold shadow-xs flex items-center space-x-2 cursor-pointer transition-all disabled:opacity-50"
+              >
+                <Video className="w-4 h-4" />
+                <span>{isSubmitting ? 'Initializing...' : 'Enter Video Chamber'}</span>
+              </button>
             </div>
 
           </div>

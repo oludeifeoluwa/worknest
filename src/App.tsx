@@ -24,9 +24,13 @@ import {
   PluginExecutionResult,
   TaskItem,
   ProjectDeliverable,
-  TaskStatus
+  TaskStatus,
+  WorkItem,
+  WorkEvidence,
+  WorkActivityLog
 } from './types';
 import { DEFAULT_PLUGINS } from './lib/pluginsData';
+import { INITIAL_WORK_ITEMS, INITIAL_WORK_TASKS, SAMPLE_TEAM_MEMBERS } from './lib/workItemsData';
 import { 
   auth, 
   db, 
@@ -85,9 +89,7 @@ import {
 import { NavigationRail } from './components/NavigationRail';
 import { ContextualSidebar } from './components/ContextualSidebar';
 import { MobileBottomNav } from './components/MobileBottomNav';
-import { AuthView } from './components/AuthView';
 import { WorkNestLogo } from './components/WorkNestLogo';
-import { WorkNestLoader } from './components/WorkNestLoader';
 
 // View Components
 import { HomeView } from './components/views/HomeView';
@@ -104,6 +106,8 @@ import { PluginsView } from './components/views/PluginsView';
 
 // Modals
 import { GlobalSearchModal } from './components/GlobalSearchModal';
+import { CreateWorkModal } from './components/CreateWorkModal';
+import { WorkItemDetailModal } from './components/WorkItemDetailModal';
 import { 
   CreateChannelModal, 
   CreateDMModal, 
@@ -118,9 +122,23 @@ export default function App() {
   // Connectivity state
   const [isConnected, setIsConnected] = useState<boolean>(navigator.onLine);
 
+  // Default active institutional officer so the workspace always loads instantly without any splash/landing gate
+  const DEFAULT_OFFICER: Member = {
+    id: 'usr_officer_olude',
+    name: 'Olude Ifeoluwa',
+    email: 'ifeoluwa.olude@worknest.gov.ng',
+    avatar: '',
+    role: 'Member',
+    status: 'online',
+    department: 'Executive Operations',
+    jobTitle: 'Senior Administrative Officer',
+    isVerifiedGov: true,
+    approvalStatus: 'approved'
+  };
+
   // Authentication State
-  const [currentUser, setCurrentUser] = useState<Member | null>(null);
-  const [isAuthLoading, setIsAuthLoading] = useState<boolean>(true);
+  const [currentUser, setCurrentUser] = useState<Member>(DEFAULT_OFFICER);
+  const [isAuthLoading, setIsAuthLoading] = useState<boolean>(false);
 
   // Organization settings
   const [organization, setOrganization] = useState<OrganizationSettings>({
@@ -298,8 +316,44 @@ export default function App() {
   const [auditLogs, setAuditLogs] = useState<AuditLogEntry[]>([]);
   const [approvedDomains, setApprovedDomains] = useState<ApprovedDomain[]>([]);
   const [invitations, setInvitations] = useState<OrganizationInvitation[]>([]);
-  const [tasks, setTasks] = useState<TaskItem[]>([]);
+
+  // WORKNEST WORKFLOW-FIRST CORE ENGINE (WorkItems & Tasks)
+  const [workItems, setWorkItems] = useState<WorkItem[]>(() => {
+    try {
+      const saved = localStorage.getItem('worknest_work_items');
+      return saved ? JSON.parse(saved) : INITIAL_WORK_ITEMS;
+    } catch {
+      return INITIAL_WORK_ITEMS;
+    }
+  });
+
+  const [tasks, setTasks] = useState<TaskItem[]>(() => {
+    try {
+      const saved = localStorage.getItem('worknest_tasks');
+      return saved ? JSON.parse(saved) : INITIAL_WORK_TASKS;
+    } catch {
+      return INITIAL_WORK_TASKS;
+    }
+  });
+
   const [deliverables, setDeliverables] = useState<ProjectDeliverable[]>([]);
+
+  // Persist workItems and tasks locally so changes are always reactive
+  useEffect(() => {
+    try {
+      localStorage.setItem('worknest_work_items', JSON.stringify(workItems));
+    } catch (e) {
+      console.error('Failed to persist work items', e);
+    }
+  }, [workItems]);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem('worknest_tasks', JSON.stringify(tasks));
+    } catch (e) {
+      console.error('Failed to persist tasks', e);
+    }
+  }, [tasks]);
 
   // ChatGPT-Style Plugins State
   const [plugins, setPlugins] = useState<ChatPlugin[]>(() => {
@@ -380,6 +434,9 @@ export default function App() {
 
   // Modals state
   const [isSearchOpen, setIsSearchOpen] = useState<boolean>(false);
+  const [isCreateWorkOpen, setIsCreateWorkOpen] = useState<boolean>(false);
+  const [selectedWorkItem, setSelectedWorkItem] = useState<WorkItem | null>(null);
+  const [isWorkItemDetailOpen, setIsWorkItemDetailOpen] = useState<boolean>(false);
   const [isCreateChannelOpen, setIsCreateChannelOpen] = useState<boolean>(false);
   const [isCreateDMOpen, setIsCreateDMOpen] = useState<boolean>(false);
   const [isComposeEmailOpen, setIsComposeEmailOpen] = useState<boolean>(false);
@@ -461,25 +518,8 @@ export default function App() {
           console.error('Error synchronizing Firebase user profile:', err);
         }
       } else {
-        const explicitLoggedOut = sessionStorage.getItem('worknest_explicit_logged_out') === 'true';
-        if (!explicitLoggedOut) {
-          // Provide default active institutional officer so the published workspace & navbar load immediately
-          const defaultOfficer: Member = {
-            id: 'usr_officer_ibrahim',
-            name: 'Dr. Ibrahim Danladi',
-            email: 'director.operations@fcta.gov.ng',
-            avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&auto=format&fit=crop&q=80',
-            role: 'Admin',
-            status: 'online',
-            department: 'Executive Operations',
-            jobTitle: 'Director of State Operations',
-            isVerifiedGov: true,
-            approvalStatus: 'approved'
-          };
-          setCurrentUser(defaultOfficer);
-        } else {
-          setCurrentUser(null);
-        }
+        // Active institutional officer so the workspace & navbar load immediately
+        setCurrentUser(DEFAULT_OFFICER);
       }
       setIsAuthLoading(false);
     });
@@ -791,9 +831,186 @@ export default function App() {
     return created.id;
   };
 
+  const handleCreateWorkItem = (
+    newWorkItem: Omit<WorkItem, 'id' | 'createdAt' | 'updatedAt' | 'progressPercentage' | 'tasksCount' | 'completedTasksCount' | 'inProgressTasksCount' | 'blockedTasksCount' | 'evidenceCount' | 'activityLogs'>,
+    newTasks: Array<{ title: string; description?: string; assigneeId: string; dueDate: string; evidenceRequired?: boolean }>
+  ) => {
+    const workItemId = `work_${Date.now()}`;
+    const now = new Date().toISOString();
+    
+    // Create task items for this work item
+    const createdTasks: TaskItem[] = newTasks.map((t, idx) => {
+      const assigneeMember = (members.length > 0 ? members : Object.values(SAMPLE_TEAM_MEMBERS)).find(m => m.id === t.assigneeId) || currentUser || Object.values(SAMPLE_TEAM_MEMBERS)[0];
+      return {
+        id: `task_${Date.now()}_${idx}`,
+        title: t.title,
+        description: t.description || '',
+        status: 'todo' as TaskStatus,
+        priority: 'high',
+        workItemId: workItemId,
+        workItemTitle: newWorkItem.title,
+        deliverableId: workItemId,
+        deliverableTitle: newWorkItem.deliverable,
+        assignee: assigneeMember,
+        assigneeIds: [assigneeMember.id],
+        assignees: [assigneeMember],
+        reporterId: currentUser?.id || 'usr_officer_olude',
+        reporterName: currentUser?.name || 'Olude Ifeoluwa',
+        dueDate: t.dueDate,
+        evidenceRequired: t.evidenceRequired,
+        createdAt: now,
+        updatedAt: now,
+        tags: [newWorkItem.department || 'Operations', 'Work Item']
+      };
+    });
+
+    const initialLog: WorkActivityLog = {
+      id: `log_${Date.now()}`,
+      userId: currentUser?.id || 'usr_officer_olude',
+      userName: currentUser?.name || 'Olude Ifeoluwa',
+      userAvatar: currentUser?.avatar || '',
+      action: 'created',
+      description: `Created work item: ${newWorkItem.title} with ${createdTasks.length} accountable tasks.`,
+      timestamp: now
+    };
+
+    const fullWorkItem: WorkItem = {
+      ...newWorkItem,
+      id: workItemId,
+      status: 'active',
+      progressPercentage: 0,
+      tasksCount: createdTasks.length,
+      completedTasksCount: 0,
+      inProgressTasksCount: 0,
+      blockedTasksCount: 0,
+      evidenceCount: 0,
+      evidence: [],
+      activityLogs: [initialLog],
+      createdAt: now,
+      updatedAt: now
+    };
+
+    setWorkItems(prev => [fullWorkItem, ...prev]);
+    setTasks(prev => [...createdTasks, ...prev]);
+
+    // Async sync to Firestore
+    createdTasks.forEach(t => {
+      createTaskItem(t as any).catch(() => {});
+    });
+
+    logAction('Created Work Item', newWorkItem.title, `Deliverable: ${newWorkItem.deliverable}, ${createdTasks.length} tasks`);
+  };
+
+  const handleUpdateWorkItem = (workItemId: string, updates: Partial<WorkItem>) => {
+    setWorkItems(prev => prev.map(w => {
+      if (w.id !== workItemId) return w;
+      return {
+        ...w,
+        ...updates,
+        updatedAt: new Date().toISOString()
+      };
+    }));
+    if (selectedWorkItem && selectedWorkItem.id === workItemId) {
+      setSelectedWorkItem(prev => prev ? { ...prev, ...updates, updatedAt: new Date().toISOString() } : null);
+    }
+  };
+
+  const handleSubmitEvidence = (
+    workItemId: string, 
+    evidenceData: { title: string; type: 'document' | 'link' | 'screenshot' | 'data'; url?: string; description: string; taskId?: string }
+  ) => {
+    const evidenceItem: WorkEvidence = {
+      id: `ev_${Date.now()}`,
+      workItemId,
+      taskId: evidenceData.taskId,
+      title: evidenceData.title,
+      type: evidenceData.type,
+      url: evidenceData.url,
+      description: evidenceData.description,
+      submittedBy: currentUser || Object.values(SAMPLE_TEAM_MEMBERS)[0],
+      submittedAt: new Date().toISOString(),
+      status: 'verified'
+    };
+
+    const newLog: WorkActivityLog = {
+      id: `log_${Date.now()}`,
+      userId: currentUser?.id || 'usr_officer_olude',
+      userName: currentUser?.name || 'Olude Ifeoluwa',
+      userAvatar: currentUser?.avatar || '',
+      action: 'submitted_evidence',
+      description: `Submitted evidence "${evidenceData.title}" for verification.`,
+      timestamp: new Date().toISOString()
+    };
+
+    setWorkItems(prev => prev.map(w => {
+      if (w.id !== workItemId) return w;
+      const updatedEv = [...(w.evidence || []), evidenceItem];
+      return {
+        ...w,
+        evidence: updatedEv,
+        evidenceCount: updatedEv.length,
+        activityLogs: [newLog, ...(w.activityLogs || [])],
+        updatedAt: new Date().toISOString()
+      };
+    }));
+
+    if (selectedWorkItem && selectedWorkItem.id === workItemId) {
+      setSelectedWorkItem(prev => {
+        if (!prev) return null;
+        const updatedEv = [...(prev.evidence || []), evidenceItem];
+        return {
+          ...prev,
+          evidence: updatedEv,
+          evidenceCount: updatedEv.length,
+          activityLogs: [newLog, ...(prev.activityLogs || [])],
+          updatedAt: new Date().toISOString()
+        };
+      });
+    }
+
+    logAction('Submitted Evidence', evidenceData.title, `For deliverable ${workItemId}`);
+  };
+
   const handleUpdateTaskStatus = async (taskId: string, newStatus: TaskStatus) => {
-    await updateTaskStatus(taskId, newStatus);
+    // 1. Immediately update local tasks state
+    setTasks(prev => prev.map(t => {
+      if (t.id !== taskId) return t;
+      return {
+        ...t,
+        status: newStatus,
+        updatedAt: new Date().toISOString()
+      };
+    }));
+
+    // 2. Persist to Firestore
+    try {
+      await updateTaskStatus(taskId, newStatus);
+    } catch {}
+
+    // 3. Update parent WorkItem progress percentage
     const target = tasks.find(t => t.id === taskId);
+    if (target && (target.workItemId || target.deliverableId)) {
+      const parentId = target.workItemId || target.deliverableId;
+      setWorkItems(prev => prev.map(w => {
+        if (w.id !== parentId) return w;
+        const itemTasks = tasks.map(t => t.id === taskId ? { ...t, status: newStatus } : t).filter(t => t.workItemId === parentId || t.deliverableId === parentId);
+        const completed = itemTasks.filter(t => t.status === 'done').length;
+        const inProgress = itemTasks.filter(t => t.status === 'in_progress').length;
+        const blocked = itemTasks.filter(t => t.blockedReason).length;
+        const total = itemTasks.length || 1;
+        const pct = Math.round((completed / total) * 100);
+
+        return {
+          ...w,
+          progressPercentage: pct,
+          completedTasksCount: completed,
+          inProgressTasksCount: inProgress,
+          blockedTasksCount: blocked,
+          status: pct === 100 ? 'completed' : w.status === 'completed' ? 'active' : w.status
+        };
+      }));
+    }
+
     await logAction('Updated Task Status', target?.title || taskId, `Moved to ${newStatus.toUpperCase()}`);
   };
 
@@ -822,15 +1039,8 @@ export default function App() {
     } catch (err) {
       console.warn('Sign out error caught:', err);
     } finally {
-      setCurrentUser(null);
+      setCurrentUser(DEFAULT_OFFICER);
       setIsAuthLoading(false);
-      setChannels([]);
-      setDirectMessages([]);
-      setMessages({});
-      setNotifications([]);
-      setActiveChannelId(null);
-      setActiveDMId(null);
-      setActiveMeetingRoomId(null);
     }
   };
 
@@ -841,30 +1051,6 @@ export default function App() {
   const totalUnreadChannels = channels.reduce((acc, c) => acc + (c.unreadCount || 0), 0);
   const totalUnreadDMs = directMessages.reduce((acc, dm) => acc + (dm.unreadCount || 0), 0);
   const totalUnreadEmails = emails.filter(e => !e.isRead).length;
-
-  // Loading state while verifying auth session
-  if (isAuthLoading) {
-    return <WorkNestLoader />;
-  }
-
-  // If user is not authenticated, render AuthView
-  if (!currentUser) {
-    return (
-      <AuthView
-        organization={organization}
-        onLoginSuccess={(member) => {
-          sessionStorage.removeItem('worknest_explicit_logged_out');
-          setCurrentUser(member);
-          logAction('User Logged In', member.email, `Role: ${member.role}`);
-        }}
-        onRegistrationSuccess={(member) => {
-          sessionStorage.removeItem('worknest_explicit_logged_out');
-          setCurrentUser(member);
-          logAction('Officer Enrolled', member.email, `Verification: Verified .gov.ng`);
-        }}
-      />
-    );
-  }
 
   return (
     <div className="flex h-screen w-screen overflow-hidden bg-[#fafafa] dark:bg-[#0d0f12] text-stone-900 dark:text-stone-100">
@@ -994,31 +1180,30 @@ export default function App() {
             />
           ) : (
             <>
-              {/* A. EXECUTIVE HOME VIEW */}
+              {/* A. EXECUTIVE HOME VIEW — WORK AT A GLANCE */}
               {activeSection === 'home' && (
                 <HomeView
-                  organization={organization}
                   currentUser={currentUser}
-                  members={members}
-                  channels={channels}
-                  directMessages={directMessages}
-                  events={events}
-                  files={files}
-                  emails={emails}
-                  onSelectChannel={handleSelectChannel}
-                  onSelectDM={handleSelectDM}
-                  onSelectFile={(file) => setPreviewingFile(file)}
+                  members={members.length > 0 ? members : Object.values(SAMPLE_TEAM_MEMBERS)}
+                  workItems={workItems}
+                  tasks={tasks}
+                  onOpenCreateWork={() => setIsCreateWorkOpen(true)}
+                  onOpenWorkItem={(workItem) => {
+                    setSelectedWorkItem(workItem);
+                    setIsWorkItemDetailOpen(true);
+                  }}
+                  onToggleTaskStatus={handleUpdateTaskStatus}
                   onNavigate={(section, targetId) => {
-                    setActiveSection(section);
+                    if (section === 'work' || section === 'tasks') {
+                      setActiveSection('tasks');
+                    } else {
+                      setActiveSection(section);
+                    }
                     if (targetId) {
                       if (section === 'channels') setActiveChannelId(targetId);
                       if (section === 'messages') setActiveDMId(targetId);
                     }
                   }}
-                  onOpenComposeEmail={() => setIsComposeEmailOpen(true)}
-                  onOpenCreateChannel={() => setIsCreateChannelOpen(true)}
-                  onOpenCreateDM={() => setIsCreateDMOpen(true)}
-                  onOpenUploadFile={() => setActiveSection('files')}
                 />
               )}
 
@@ -1026,9 +1211,18 @@ export default function App() {
               {activeSection === 'tasks' && (
                 <TasksView
                   currentUser={currentUser}
-                  members={members}
+                  members={members.length > 0 ? members : Object.values(SAMPLE_TEAM_MEMBERS)}
                   tasks={tasks}
-                  deliverables={deliverables}
+                  deliverables={workItems.map(w => ({
+                    id: w.id,
+                    title: w.title,
+                    code: w.deliverable,
+                    department: w.department,
+                    description: w.goal,
+                    targetDate: w.deadline,
+                    status: w.status === 'completed' ? 'completed' : w.blockedTasksCount > 0 ? 'at_risk' : 'on_track',
+                    progressPercentage: w.progressPercentage
+                  }))}
                   onCreateTask={handleCreateTask}
                   onUpdateTaskStatus={handleUpdateTaskStatus}
                   onUpdateTask={handleUpdateTask}
@@ -1460,29 +1654,91 @@ export default function App() {
         onSelectAction={(actionId) => {
           setIsQuickActionsOpen(false);
           switch (actionId) {
+            case 'work':
+            case 'create_work':
+              setIsCreateWorkOpen(true);
+              break;
+            case 'message':
             case 'new_message':
               setIsCreateDMOpen(true);
               break;
+            case 'channel':
             case 'new_channel':
               setIsCreateChannelOpen(true);
               break;
+            case 'email':
             case 'compose_email':
               setIsComposeEmailOpen(true);
               break;
+            case 'event':
             case 'schedule_event':
               setActiveSection('calendar');
               break;
+            case 'meeting':
             case 'start_meeting': {
               const newRoom = `chambers-${Date.now().toString(36)}`;
               setActiveMeetingRoomId(newRoom);
               break;
             }
+            case 'file':
             case 'upload_document':
               setActiveSection('files');
               break;
             default:
               break;
           }
+        }}
+      />
+
+      {/* 4-STEP GUIDED CREATE WORK MODAL */}
+      <CreateWorkModal
+        isOpen={isCreateWorkOpen}
+        onClose={() => setIsCreateWorkOpen(false)}
+        currentUser={currentUser || Object.values(SAMPLE_TEAM_MEMBERS)[0]}
+        members={members.length > 0 ? members : Object.values(SAMPLE_TEAM_MEMBERS)}
+        onCreateWork={handleCreateWorkItem}
+      />
+
+      {/* COMPREHENSIVE WORK ITEM EXECUTION & ACCOUNTABILITY MODAL */}
+      <WorkItemDetailModal
+        isOpen={isWorkItemDetailOpen}
+        onClose={() => {
+          setIsWorkItemDetailOpen(false);
+          setSelectedWorkItem(null);
+        }}
+        workItem={selectedWorkItem}
+        tasks={tasks}
+        currentUser={currentUser || Object.values(SAMPLE_TEAM_MEMBERS)[0]}
+        members={members.length > 0 ? members : Object.values(SAMPLE_TEAM_MEMBERS)}
+        onToggleTaskStatus={handleUpdateTaskStatus}
+        onUpdateWorkItem={handleUpdateWorkItem}
+        onSubmitEvidence={handleSubmitEvidence}
+        onCreateTaskForWorkItem={(taskData) => {
+          if (!selectedWorkItem) return;
+          const assignedMember = (members.length > 0 ? members : Object.values(SAMPLE_TEAM_MEMBERS)).find(m => m.id === taskData.assigneeId) || currentUser || Object.values(SAMPLE_TEAM_MEMBERS)[0];
+          const newTask: TaskItem = {
+            id: `task_${Date.now()}`,
+            title: taskData.title,
+            description: taskData.description || '',
+            status: 'todo',
+            priority: 'high',
+            workItemId: selectedWorkItem.id,
+            workItemTitle: selectedWorkItem.title,
+            deliverableId: selectedWorkItem.id,
+            deliverableTitle: selectedWorkItem.deliverable,
+            assignee: assignedMember,
+            assigneeIds: [assignedMember.id],
+            assignees: [assignedMember],
+            reporterId: currentUser?.id || 'usr_officer_olude',
+            reporterName: currentUser?.name || 'Olude Ifeoluwa',
+            dueDate: taskData.dueDate,
+            evidenceRequired: taskData.evidenceRequired,
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
+            tags: [selectedWorkItem.department || 'Operations', 'Work Item']
+          };
+          setTasks(prev => [newTask, ...prev]);
+          createTaskItem(newTask as any).catch(() => {});
         }}
       />
 
