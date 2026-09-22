@@ -19,7 +19,7 @@ import {
   Folder,
   FolderCheck,
   Search,
-  Star,
+  Bookmark,
   Plus,
   Calendar,
   Video,
@@ -885,12 +885,12 @@ export const ChannelBrowserModal: React.FC<ChannelBrowserModalProps> = ({
                         onClick={() => onToggleFavoriteChannel(chan.id)}
                         className={`p-2 rounded-xl transition-all cursor-pointer ${
                           isFav 
-                            ? 'text-amber-500 bg-amber-50 dark:bg-amber-950/50 border border-amber-200 dark:border-amber-800' 
+                            ? 'text-blue-600 bg-blue-50 dark:bg-blue-950/50 border border-blue-200 dark:border-blue-800' 
                             : 'text-stone-400 hover:text-stone-700 dark:hover:text-stone-200 hover:bg-stone-100 dark:hover:bg-stone-800'
                         }`}
-                        title={isFav ? 'Remove from favorites' : 'Add to favorites'}
+                        title={isFav ? 'Remove bookmark' : 'Bookmark channel'}
                       >
-                        <Star className={`w-4 h-4 ${isFav ? 'fill-amber-500' : ''}`} />
+                        <Bookmark className={`w-4 h-4 ${isFav ? 'fill-current' : ''}`} />
                       </button>
                     )}
                     <button

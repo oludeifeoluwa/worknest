@@ -6,23 +6,13 @@ import {
   X, 
   ChevronRight, 
   Check, 
-  ChevronDown, 
   LogOut, 
   ShieldCheck, 
   CheckCircle2, 
   Sun, 
   Moon, 
-  PanelLeftClose, 
-  PanelLeftOpen,
-  Plus,
-  Home,
-  MessageSquare,
-  Calendar,
-  Video,
-  CheckSquare,
-  Hash,
-  FileText,
-  Mail
+  PanelLeft,
+  Plus
 } from 'lucide-react';
 import { 
   ActiveSection, 
@@ -33,6 +23,7 @@ import {
   OrganizationSettings, 
   UserStatus 
 } from '../types';
+import { getBreadcrumbForSection } from '../config/navigation';
 import { WorkNestLogo } from './WorkNestLogo';
 import { UserAvatar } from './UserAvatar';
 
@@ -43,6 +34,8 @@ interface TopHeaderProps {
   activeDM?: DirectMessage | null;
   activeEmailFolder?: string;
   activeSettingsTab?: string;
+  activeTaskFilter?: 'all' | 'my_tasks' | 'urgent';
+  breadcrumbOverride?: string;
   currentUser?: Member | null;
   notifications?: NotificationItem[];
   unreadNotifications?: NotificationItem[];
@@ -87,6 +80,8 @@ export const TopHeader: React.FC<TopHeaderProps> = ({
   activeSection = 'home',
   activeChannel = null,
   activeDM = null,
+  activeTaskFilter = 'all',
+  breadcrumbOverride,
   currentUser,
   notifications = [],
   unreadNotifications = [],
@@ -117,17 +112,6 @@ export const TopHeader: React.FC<TopHeaderProps> = ({
 
   const notifRef = useRef<HTMLDivElement>(null);
   const userMenuRef = useRef<HTMLDivElement>(null);
-
-  const topNavTabs: { id: ActiveSection; label: string; icon: any; badge?: number }[] = [
-    { id: 'home', label: 'Overview', icon: Home },
-    { id: 'channels', label: 'Channels', icon: Hash, badge: unreadChannelsCount },
-    { id: 'messages', label: 'Messages', icon: MessageSquare, badge: unreadDMsCount },
-    { id: 'tasks', label: 'Tasks', icon: CheckSquare },
-    { id: 'calendar', label: 'Calendar', icon: Calendar },
-    { id: 'meetings', label: 'Meetings', icon: Video },
-    { id: 'files', label: 'Vault', icon: FileText },
-    { id: 'email', label: 'Dispatches', icon: Mail, badge: unreadEmailsCount },
-  ];
 
   // Close menus when clicking outside or pressing Escape
   useEffect(() => {
@@ -172,37 +156,13 @@ export const TopHeader: React.FC<TopHeaderProps> = ({
   };
 
   const getBreadcrumb = () => {
-    switch (activeSection) {
-      case 'home':
-        return 'Executive Overview & Briefings';
-      case 'tasks':
-        return 'Tasks & Deliverables';
-      case 'channels':
-        return activeChannel ? `#${activeChannel.name}` : 'Council Channels';
-      case 'messages':
-        if (activeDM) {
-          const participants = activeDM.participants || [];
-          const other = participants.find(p => p.id !== currentUser?.id) || participants[0] || { name: 'Staff Member' };
-          return `@${other.name}`;
-        }
-        return 'Direct Staff Lines';
-      case 'calendar':
-        return 'Calendar & Deliberations';
-      case 'meetings':
-        return 'Video Calls & Council Chambers';
-      case 'email':
-        return 'Official Government Email';
-      case 'plugins':
-        return 'Integrations & Extensions';
-      case 'files':
-        return 'Statutory Gazettes & Vault';
-      case 'people':
-        return 'Staff Directory';
-      case 'settings':
-        return 'Organization Governance & Settings';
-      default:
-        return 'Workspace';
-    }
+    if (breadcrumbOverride) return breadcrumbOverride;
+    const dmPartner = activeDM?.participants?.find(p => p.id !== currentUser?.id) || activeDM?.participants?.[0];
+    return getBreadcrumbForSection((activeSection as ActiveSection) || 'home', {
+      activeChannelName: activeChannel?.name,
+      activeDMName: dmPartner?.name,
+      activeTaskFilter
+    });
   };
 
   const statusColors: Record<UserStatus, string> = {
@@ -220,14 +180,16 @@ export const TopHeader: React.FC<TopHeaderProps> = ({
   return (
     <header 
       id="top-header"
-      className="h-14 w-full border-b bg-white dark:bg-[#0F172A] border-stone-200 dark:border-stone-800/80 px-2 sm:px-4 flex items-center justify-between select-none shrink-0 z-20 transition-colors gap-1.5 sm:gap-3 relative"
+      data-testid="top-navbar"
+      className="h-14 w-full border-b bg-white dark:bg-[#0B101B] border-stone-200 dark:border-stone-800 px-4 sm:px-6 flex items-center justify-between select-none shrink-0 z-20 transition-colors gap-2 sm:gap-4 relative"
     >
       {/* Left: Mobile Drawer Trigger, Desktop Sidebar Toggle & Breadcrumbs */}
-      <div className="flex items-center space-x-1.5 sm:space-x-2.5 min-w-0 shrink">
+      <div className="flex items-center space-x-2 sm:space-x-3 min-w-0 shrink">
         
         {/* Mobile menu burger */}
         <button
           id="mobile-nav-toggle-btn"
+          data-testid="mobile-nav-toggle-btn"
           onClick={handleMobileToggle}
           className="md:hidden p-1.5 -ml-1 rounded-lg text-stone-600 dark:text-stone-300 hover:bg-stone-100 dark:hover:bg-stone-800 focus:outline-none shrink-0 cursor-pointer"
           title="Toggle Navigation Menu"
@@ -240,16 +202,13 @@ export const TopHeader: React.FC<TopHeaderProps> = ({
         {onToggleSidebarCollapse && (
           <button
             id="topbar-sidebar-toggle-btn"
+            data-testid="topbar-sidebar-toggle-btn"
             onClick={onToggleSidebarCollapse}
-            className="hidden md:flex p-1.5 rounded-lg text-stone-500 hover:text-stone-900 dark:text-stone-400 dark:hover:text-stone-100 hover:bg-stone-100 dark:hover:bg-stone-800/80 transition-colors cursor-pointer shrink-0"
-            title={isSidebarCollapsed ? "Expand side navigation" : "Collapse side navigation (focus mode)"}
+            className="hidden md:flex p-1.5 rounded-lg text-stone-600 hover:text-stone-900 dark:text-stone-400 dark:hover:text-stone-100 hover:bg-stone-100 dark:hover:bg-stone-800/80 transition-colors cursor-pointer shrink-0"
+            title={isSidebarCollapsed ? "Expand side navigation" : "Collapse side navigation"}
             aria-label={isSidebarCollapsed ? "Expand side navigation" : "Collapse side navigation"}
           >
-            {isSidebarCollapsed ? (
-              <PanelLeftOpen className="w-4.5 h-4.5" />
-            ) : (
-              <PanelLeftClose className="w-4.5 h-4.5" />
-            )}
+            <PanelLeft className="w-5 h-5 stroke-[1.75]" />
           </button>
         )}
 
@@ -258,118 +217,56 @@ export const TopHeader: React.FC<TopHeaderProps> = ({
           <WorkNestLogo size="xs" />
         </div>
 
-        {/* Workspace Title & Current View Path */}
-        <div className="flex items-center space-x-1 sm:space-x-1.5 min-w-0 text-xs truncate">
-          <span className="font-semibold text-stone-800 dark:text-stone-200 truncate hidden md:inline">
-            {organization?.name || 'WorkNest'}
+        {/* View Title & Breadcrumb */}
+        <div className="flex items-center space-x-2 min-w-0">
+          <span className="font-bold text-stone-900 dark:text-stone-100 text-sm tracking-tight shrink-0">
+            WorkNest
           </span>
-          <span className="text-stone-400 hidden md:inline">/</span>
-          <span className="font-medium text-[#0062FF] dark:text-blue-400 truncate text-[11px] sm:text-xs">
+          <span className="text-stone-400 dark:text-stone-500 font-normal text-sm">/</span>
+          <h1 
+            data-testid="topbar-title"
+            className="font-medium text-[#0062FF] dark:text-blue-500 text-sm tracking-tight truncate"
+          >
             {getBreadcrumb()}
-          </span>
+          </h1>
         </div>
       </div>
 
-      {/* Primary Horizontal Navbar (for xl+ screens: all 8 items; for lg screens: top items) */}
-      {onSelectSection && (
-        <nav 
-          id="top-horizontal-navbar" 
-          aria-label="Top Primary Navigation" 
-          className="hidden xl:flex items-center space-x-1 shrink-0 ml-1 mr-2"
-        >
-          {topNavTabs.map((tab) => {
-            const Icon = tab.icon;
-            const isActive = activeSection === tab.id;
-            return (
-              <button
-                key={tab.id}
-                id={`top-nav-tab-${tab.id}`}
-                onClick={() => onSelectSection(tab.id)}
-                className={`px-2.5 py-1 rounded-xl text-xs font-semibold flex items-center space-x-1.5 transition-all cursor-pointer whitespace-nowrap ${
-                  isActive
-                    ? 'bg-[#0062FF] text-white shadow-xs font-bold'
-                    : 'text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-100 hover:bg-stone-100 dark:hover:bg-stone-800/80'
-                }`}
-                title={tab.label}
-              >
-                <Icon className={`w-3.5 h-3.5 shrink-0 ${isActive ? 'text-white' : 'text-stone-400 dark:text-stone-500'}`} />
-                <span>{tab.label}</span>
-                {Boolean(tab.badge && tab.badge > 0) && (
-                  <span className={`px-1.5 py-0.2 rounded-full text-[10px] font-bold ${
-                    isActive ? 'bg-white/25 text-white' : 'bg-[#0062FF] text-white'
-                  }`}>
-                    {tab.badge}
-                  </span>
-                )}
-              </button>
-            );
-          })}
-        </nav>
-      )}
-
-      {/* Compact Switcher for lg screens */}
-      {onSelectSection && (
-        <nav 
-          id="top-compact-navbar" 
-          aria-label="Compact Horizontal Navigation" 
-          className="hidden lg:flex xl:hidden items-center space-x-1 shrink-0 ml-1 mr-2"
-        >
-          {topNavTabs.slice(0, 4).map((tab) => {
-            const Icon = tab.icon;
-            const isActive = activeSection === tab.id;
-            return (
-              <button
-                key={tab.id}
-                id={`top-compact-tab-${tab.id}`}
-                onClick={() => onSelectSection(tab.id)}
-                className={`px-2 py-1 rounded-lg text-xs font-semibold flex items-center space-x-1 transition-all cursor-pointer whitespace-nowrap ${
-                  isActive
-                    ? 'bg-[#0062FF] text-white shadow-xs font-bold'
-                    : 'text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-100 hover:bg-stone-100 dark:hover:bg-stone-800/80'
-                }`}
-                title={tab.label}
-              >
-                <Icon className={`w-3.5 h-3.5 shrink-0 ${isActive ? 'text-white' : 'text-stone-400 dark:text-stone-500'}`} />
-                <span>{tab.label}</span>
-              </button>
-            );
-          })}
-        </nav>
-      )}
-
       {/* Center: Global Search Bar */}
-      <div className="flex-1 max-w-xs sm:max-w-md mx-1 sm:mx-3 min-w-0 flex justify-center">
+      <div className="flex-1 max-w-sm sm:max-w-md mx-2 sm:mx-4 min-w-0 flex justify-center">
         <button
           id="global-search-trigger"
+          data-testid="global-search-trigger"
           onClick={onOpenSearch}
-          className="w-full max-w-sm flex items-center justify-between px-2 sm:px-3 py-1.5 rounded-xl border border-stone-200 dark:border-stone-700/80 bg-stone-50 hover:bg-stone-100 dark:bg-stone-900/60 dark:hover:bg-stone-800/80 text-stone-500 dark:text-stone-400 text-xs transition-colors shadow-2xs min-w-0 cursor-pointer"
-          title="Search messages, channels, gazettes, or staff (Cmd+K)"
+          className="w-full max-w-[420px] flex items-center justify-between px-3.5 py-1.5 rounded-full border border-stone-200 dark:border-stone-800 bg-stone-50/50 hover:bg-stone-100/60 dark:bg-stone-900/40 dark:hover:bg-stone-800/60 text-stone-400 dark:text-stone-400 text-xs sm:text-[13px] transition-colors shadow-2xs min-w-0 cursor-pointer"
+          title="Search directives, files, staff... (Cmd+K)"
         >
-          <div className="flex items-center space-x-1.5 sm:space-x-2 truncate min-w-0">
-            <Search className="w-3.5 h-3.5 text-stone-400 shrink-0" />
-            <span className="truncate hidden sm:inline">Search WorkNest directives, files, staff...</span>
-            <span className="truncate sm:hidden text-[11px]">Search...</span>
+          <div className="flex items-center space-x-2 truncate min-w-0">
+            <Search className="w-4 h-4 text-stone-400 shrink-0 stroke-[1.8]" />
+            <span className="truncate hidden sm:inline text-stone-400 font-normal">Search WorkNest directives, files, staff...</span>
+            <span className="truncate sm:hidden text-[11px] text-stone-400">Search directives...</span>
           </div>
-          <kbd className="hidden sm:inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-mono bg-stone-200/80 dark:bg-stone-800 text-stone-600 dark:text-stone-300 shrink-0 ml-1">
+          <kbd className="hidden sm:inline-flex items-center px-1.5 py-0.5 rounded text-[11px] font-mono bg-stone-100 dark:bg-stone-800/80 border border-stone-200/80 dark:border-stone-700/80 text-stone-400 dark:text-stone-400 shrink-0 ml-2">
             ⌘K
           </kbd>
         </button>
       </div>
 
       {/* Right: Quick Action, Dark Mode Toggle, Notifications, Gateway Badge, Profile */}
-      <div className="flex items-center space-x-1 sm:space-x-2 shrink-0">
+      <div className="flex items-center space-x-2 sm:space-x-3 shrink-0">
         
         {/* Global Quick Action Create Button */}
         {onOpenQuickActions && (
           <button
             id="topbar-quick-action-btn"
+            data-testid="topbar-quick-action-btn"
             onClick={onOpenQuickActions}
-            className="p-1.5 sm:px-2.5 sm:py-1.5 rounded-xl bg-[#0062FF] hover:bg-[#0048C6] active:bg-[#0038A8] text-white text-xs font-bold transition-all shadow-xs flex items-center space-x-1 sm:space-x-1.5 cursor-pointer shrink-0"
+            className="px-4 py-1.5 rounded-full bg-[#0062FF] hover:bg-blue-700 active:bg-blue-800 text-white text-xs sm:text-[13px] font-medium transition-colors shadow-xs flex items-center space-x-1.5 cursor-pointer shrink-0"
             title="Create New..."
             aria-label="Create New Action"
           >
-            <Plus className="w-4 h-4" />
-            <span className="hidden sm:inline">New</span>
+            <Plus className="w-4 h-4 text-white stroke-[2.5]" />
+            <span>New</span>
           </button>
         )}
 
@@ -377,15 +274,16 @@ export const TopHeader: React.FC<TopHeaderProps> = ({
         {onToggleTheme && (
           <button
             id="topbar-theme-toggle-btn"
+            data-testid="topbar-theme-toggle-btn"
             onClick={onToggleTheme}
-            className="p-1.5 sm:p-2 rounded-xl text-stone-500 hover:text-amber-500 dark:hover:text-amber-300 dark:text-stone-400 hover:bg-stone-100 dark:hover:bg-stone-800 transition-colors cursor-pointer shrink-0"
+            className="p-2 rounded-full text-stone-600 hover:text-stone-900 dark:text-stone-400 dark:hover:text-stone-100 hover:bg-stone-100 dark:hover:bg-stone-800 transition-colors cursor-pointer shrink-0"
             title={theme === 'dark' ? "Switch to Light Mode" : "Switch to Dark Mode"}
             aria-label="Toggle Theme"
           >
             {theme === 'dark' ? (
-              <Sun className="w-4 h-4 sm:w-4.5 sm:h-4.5 text-amber-400" />
+              <Sun className="w-5 h-5 text-amber-400 stroke-[1.75]" />
             ) : (
-              <Moon className="w-4 h-4 sm:w-4.5 sm:h-4.5 text-stone-600" />
+              <Moon className="w-5 h-5 stroke-[1.75]" />
             )}
           </button>
         )}
@@ -394,15 +292,16 @@ export const TopHeader: React.FC<TopHeaderProps> = ({
         <div className="relative" ref={notifRef}>
           <button
             id="notifications-dropdown-btn"
+            data-testid="notifications-dropdown-btn"
             onClick={() => setShowNotifications(prev => !prev)}
-            className="p-1.5 sm:p-2 rounded-xl text-stone-500 hover:text-stone-800 dark:text-stone-400 dark:hover:text-stone-200 hover:bg-stone-100 dark:hover:bg-stone-800 transition-colors relative cursor-pointer shrink-0"
+            className="p-2 rounded-full text-stone-600 hover:text-stone-900 dark:text-stone-400 dark:hover:text-stone-100 hover:bg-stone-100 dark:hover:bg-stone-800 transition-colors relative cursor-pointer shrink-0"
             title="Notifications & Directives"
             aria-label="Notifications"
             aria-expanded={showNotifications}
           >
-            <Bell className="w-4 h-4 sm:w-4.5 sm:h-4.5 stroke-[1.75px]" />
+            <Bell className="w-5 h-5 stroke-[1.75]" />
             {unreadCount > 0 && (
-              <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-[#0062FF] ring-2 ring-white dark:ring-[#0F172A]" />
+              <span className="absolute top-2 right-2 w-2 h-2 rounded-full bg-[#0062FF] ring-2 ring-white dark:ring-[#0F172A]" />
             )}
           </button>
 
@@ -470,8 +369,9 @@ export const TopHeader: React.FC<TopHeaderProps> = ({
         <div className="relative" ref={userMenuRef}>
           <button
             id="topbar-user-avatar-btn"
+            data-testid="topbar-user-avatar-btn"
             onClick={() => setShowUserMenu(prev => !prev)}
-            className="flex items-center space-x-1 p-1 rounded-xl hover:bg-stone-100 dark:hover:bg-stone-800 transition-colors focus:outline-none cursor-pointer shrink-0"
+            className="flex items-center rounded-lg hover:opacity-90 transition-opacity focus:outline-none cursor-pointer shrink-0"
             title={`${currentUser?.name || 'Officer'} Profile`}
             aria-label="User Profile"
             aria-expanded={showUserMenu}
@@ -482,7 +382,6 @@ export const TopHeader: React.FC<TopHeaderProps> = ({
               showStatus={true}
               shape="rounded"
             />
-            <ChevronDown className="w-3 h-3 text-stone-400 hidden sm:inline" />
           </button>
 
           {/* User Quick Modal */}

@@ -35,9 +35,11 @@ interface MobileBottomNavProps {
 export const MobileBottomNav: React.FC<MobileBottomNavProps> = ({
   activeSection,
   onSelectSection,
+  onToggleSidebar,
   unreadChannelsCount = 0,
   unreadDMsCount = 0,
   unreadEmailsCount = 0,
+  activeMeetingCount = 0,
   theme = 'dark',
   onToggleTheme,
   onLogout
@@ -65,36 +67,43 @@ export const MobileBottomNav: React.FC<MobileBottomNavProps> = ({
       matches: (s: ActiveSection) => s === 'home'
     },
     {
+      id: 'tasks' as ActiveSection,
+      label: 'Work',
+      icon: CheckSquare,
+      badge: 0,
+      matches: (s: ActiveSection) => s === 'tasks' || (s as string) === 'work'
+    },
+    {
+      id: 'channels' as ActiveSection,
+      label: 'Channels',
+      icon: Hash,
+      badge: unreadChannelsCount,
+      matches: (s: ActiveSection) => s === 'channels'
+    },
+    {
       id: 'messages' as ActiveSection,
       label: 'Messages',
       icon: MessageSquare,
       badge: unreadDMsCount,
       matches: (s: ActiveSection) => s === 'messages'
-    },
-    {
-      id: 'calendar' as ActiveSection,
-      label: 'Calendar',
-      icon: Calendar,
-      badge: 0,
-      matches: (s: ActiveSection) => s === 'calendar'
-    },
-    {
-      id: 'meetings' as ActiveSection,
-      label: 'Meetings',
-      icon: Video,
-      badge: 0,
-      matches: (s: ActiveSection) => s === 'meetings'
     }
   ];
 
   // Secondary items in the "More" Drawer
   const secondaryItems = [
     {
-      id: 'channels' as ActiveSection,
-      label: 'Council Channels',
-      description: 'Public, private, and department group channels',
-      icon: Hash,
-      badge: unreadChannelsCount
+      id: 'meetings' as ActiveSection,
+      label: 'Video Call & Chambers',
+      description: 'Encrypted multi-party video deliberations',
+      icon: Video,
+      badge: activeMeetingCount > 0 ? 'Live' : 0
+    },
+    {
+      id: 'calendar' as ActiveSection,
+      label: 'Executive Calendar',
+      description: 'State sessions, deadlines, and high council hearings',
+      icon: Calendar,
+      badge: 0
     },
     {
       id: 'email' as ActiveSection,
@@ -102,13 +111,6 @@ export const MobileBottomNav: React.FC<MobileBottomNavProps> = ({
       description: 'Formal institutional correspondence and gazettes',
       icon: Mail,
       badge: unreadEmailsCount
-    },
-    {
-      id: 'tasks' as ActiveSection,
-      label: 'Project Tasks & Deliverables',
-      description: 'Track state deliverables, milestones & task directives',
-      icon: CheckSquare,
-      badge: 0
     },
     {
       id: 'files' as ActiveSection,
@@ -140,13 +142,25 @@ export const MobileBottomNav: React.FC<MobileBottomNavProps> = ({
     }
   ];
 
+  const handleItemClick = (item: typeof primaryItems[0]) => {
+    if (activeSection === item.id) {
+      if ((item.id === 'channels' || item.id === 'messages') && onToggleSidebar) {
+        onToggleSidebar();
+      }
+    } else {
+      onSelectSection(item.id);
+    }
+    setIsMoreMenuOpen(false);
+  };
+
   return (
     <>
       {/* 1. Dedicated Mobile Bottom Navigation Bar */}
       <nav 
         id="mobile-bottom-navigation"
+        data-testid="mobile-bottom-navigation"
         aria-label="Mobile Navigation"
-        className="fixed bottom-0 inset-x-0 z-40 md:hidden bg-white/95 dark:bg-[#0B101B]/95 backdrop-blur-md border-t border-stone-200 dark:border-stone-800 px-1.5 py-1 flex items-center justify-around shadow-2xl transition-colors select-none"
+        className="fixed bottom-0 inset-x-0 z-40 md:hidden bg-white dark:bg-[#0B101B] border-t border-stone-200 dark:border-stone-800 px-1.5 py-1 flex items-center justify-around shadow-2xl transition-colors select-none"
         style={{ paddingBottom: 'max(0.375rem, env(safe-area-inset-bottom, 0px))' }}
       >
         {primaryItems.map((item) => {
@@ -156,14 +170,12 @@ export const MobileBottomNav: React.FC<MobileBottomNavProps> = ({
             <button
               key={item.id}
               id={`mobile-nav-${item.id}`}
-              onClick={() => {
-                onSelectSection(item.id);
-                setIsMoreMenuOpen(false);
-              }}
+              data-testid={`mobile-nav-${item.id}`}
+              onClick={() => handleItemClick(item)}
               className={`flex flex-col items-center justify-center min-w-[54px] py-1 px-1 rounded-xl transition-all relative cursor-pointer ${
                 isActive 
                   ? 'text-[#0062FF] dark:text-blue-400 font-bold' 
-                  : 'text-stone-500 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-200'
+                  : 'text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-100'
               }`}
             >
               <div className="relative">
@@ -174,7 +186,12 @@ export const MobileBottomNav: React.FC<MobileBottomNavProps> = ({
                   </span>
                 )}
               </div>
-              <span className="text-[10px] mt-0.5 font-medium truncate">{item.label}</span>
+              <span 
+                data-testid={`mobile-nav-label-${item.id}`}
+                className="text-[10px] mt-0.5 font-semibold truncate tracking-tight"
+              >
+                {item.label}
+              </span>
             </button>
           );
         })}
@@ -182,15 +199,16 @@ export const MobileBottomNav: React.FC<MobileBottomNavProps> = ({
         {/* More Drawer Button */}
         <button
           id="mobile-nav-more"
+          data-testid="mobile-nav-more"
           onClick={() => setIsMoreMenuOpen(prev => !prev)}
           className={`flex flex-col items-center justify-center min-w-[54px] py-1 px-1 rounded-xl transition-all relative cursor-pointer ${
             isMoreMenuOpen 
               ? 'text-[#0062FF] dark:text-blue-400 font-bold' 
-              : 'text-stone-500 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-200'
+              : 'text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-100'
           }`}
         >
           <Menu className="w-5 h-5" />
-          <span className="text-[10px] mt-0.5 font-medium">More</span>
+          <span className="text-[10px] mt-0.5 font-semibold tracking-tight">More</span>
         </button>
       </nav>
 
@@ -259,8 +277,12 @@ export const MobileBottomNav: React.FC<MobileBottomNavProps> = ({
                         <span className="font-semibold text-xs text-stone-900 dark:text-stone-100 truncate">
                           {item.label}
                         </span>
-                        {item.badge !== undefined && item.badge > 0 && (
-                          <span className="px-1.5 py-0.2 rounded-full bg-[#0062FF] text-[9px] font-bold text-white">
+                        {Boolean(item.badge) && (typeof item.badge === 'string' ? item.badge.length > 0 : item.badge > 0) && (
+                          <span className={`px-1.5 py-0.2 rounded-full text-[9px] font-bold ${
+                            item.badge === 'Live'
+                              ? 'bg-rose-600 text-white animate-pulse'
+                              : 'bg-[#0062FF] text-white'
+                          }`}>
                             {item.badge}
                           </span>
                         )}

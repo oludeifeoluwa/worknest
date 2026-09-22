@@ -7,7 +7,7 @@ import {
   ChevronRight, 
   Search, 
   Inbox, 
-  Star, 
+  Bookmark, 
   Send, 
   FileText, 
   Archive, 
@@ -322,7 +322,7 @@ export const ContextualSidebar: React.FC<ContextualSidebarProps> = ({
   }
 
   // Home view does not need persistent secondary clutter on desktop unless on mobile
-  if (activeSection === 'home' && !isOpenMobile && isSidebarCollapsed) {
+  if (activeSection === 'home' && !isOpenMobile) {
     return null;
   }
 
@@ -421,7 +421,7 @@ export const ContextualSidebar: React.FC<ContextualSidebarProps> = ({
                         : 'text-stone-600 dark:text-stone-400 hover:bg-stone-200/60 dark:hover:bg-stone-800/60'
                     }`}
                   >
-                    {tab === 'recent' ? 'Recent' : tab === 'unread' ? 'Unread' : 'Starred'}
+                    {tab === 'recent' ? 'Recent' : tab === 'unread' ? 'Unread' : 'Pinned'}
                   </button>
                 ))}
               </div>
@@ -542,9 +542,9 @@ export const ContextualSidebar: React.FC<ContextualSidebarProps> = ({
               {/* Favorites Section */}
               {favoriteChannels.length > 0 && (
                 <div className="space-y-0.5">
-                  <div className="flex items-center space-x-1 px-2 py-1 text-[10px] font-bold uppercase tracking-wider text-amber-600 dark:text-amber-400">
-                    <Star className="w-3 h-3 fill-amber-500 text-amber-500" />
-                    <span>Favorites</span>
+                  <div className="flex items-center space-x-1 px-2 py-1 text-[10px] font-bold uppercase tracking-wider text-blue-600 dark:text-blue-400">
+                    <Bookmark className="w-3 h-3 text-blue-600 dark:text-blue-400" />
+                    <span>Pinned Channels</span>
                   </div>
                   {favoriteChannels.map(chan => {
                     const isSelected = selectedChanId === chan.id;
@@ -775,7 +775,7 @@ export const ContextualSidebar: React.FC<ContextualSidebarProps> = ({
               {/* Primary Core Folders */}
               {[
                 { id: 'inbox', label: 'Inbox', icon: Inbox, count: unreadEmailsCount },
-                { id: 'starred', label: 'Starred & Classified', icon: Star, count: 0 },
+                { id: 'starred', label: 'Flagged & Priority', icon: Bookmark, count: 0 },
                 { id: 'sent', label: 'Sent Dispatches', icon: Send, count: 0 },
                 { id: 'drafts', label: 'Drafts', icon: FileText, count: 0 }
               ].map(folder => {

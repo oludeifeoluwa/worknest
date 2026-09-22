@@ -27,7 +27,7 @@ interface CreateWorkModalProps {
   onClose: () => void;
   currentUser: Member | null;
   members: Member[];
-  onCreateWorkItem: (
+  onCreateWorkItem?: (
     workItem: Omit<WorkItem, 'id' | 'createdAt' | 'updatedAt' | 'progressPercentage' | 'tasksCount' | 'completedTasksCount' | 'inProgressTasksCount' | 'blockedTasksCount' | 'reviewTasksCount' | 'evidence' | 'activityLog'>,
     tasks: Array<{
       title: string;
@@ -36,6 +36,10 @@ interface CreateWorkModalProps {
       priority: 'urgent' | 'high' | 'medium' | 'low';
       evidenceRequired: boolean;
     }>
+  ) => Promise<void> | void;
+  onCreateWork?: (
+    workItem: any,
+    tasks: any[]
   ) => Promise<void> | void;
 }
 
@@ -126,7 +130,8 @@ export const CreateWorkModal: React.FC<CreateWorkModalProps> = ({
   onClose,
   currentUser,
   members,
-  onCreateWorkItem
+  onCreateWorkItem,
+  onCreateWork
 }) => {
   const [currentStep, setCurrentStep] = useState<1 | 2 | 3 | 4>(1);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -270,7 +275,10 @@ export const CreateWorkModal: React.FC<CreateWorkModalProps> = ({
         contributors: contributorMapping.map(c => c.member)
       };
 
-      await onCreateWorkItem(newWorkItem, tasks);
+      const submitFn = onCreateWorkItem || onCreateWork;
+      if (typeof submitFn === 'function') {
+        await submitFn(newWorkItem, tasks);
+      }
       onClose();
     } catch (err) {
       console.error('Failed to create work item:', err);

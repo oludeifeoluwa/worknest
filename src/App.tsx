@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { 
   Channel, 
   DirectMessage, 
@@ -85,10 +85,11 @@ import {
   cleanForFirestore
 } from './lib/firestoreService';
 
-// Web Navigation Components
-import { NavigationRail } from './components/NavigationRail';
-import { ContextualSidebar } from './components/ContextualSidebar';
+// Web Navigation Components & Global Shell
+import { AppShell } from './components/layout/AppShell';
+import { Sidebar } from './components/layout/Sidebar';
 import { MobileBottomNav } from './components/MobileBottomNav';
+import { TopHeader } from './components/TopHeader';
 import { WorkNestLogo } from './components/WorkNestLogo';
 
 // View Components
@@ -124,20 +125,66 @@ export default function App() {
 
   // Default active institutional officer so the workspace always loads instantly without any splash/landing gate
   const DEFAULT_OFFICER: Member = {
-    id: 'usr_officer_olude',
-    name: 'Olude Ifeoluwa',
-    email: 'ifeoluwa.olude@worknest.gov.ng',
+    id: 'usr_sysadmin',
+    name: 'System Administrator',
+    email: 'admin@worknest.workspace',
     avatar: '',
-    role: 'Member',
+    role: 'Admin',
     status: 'online',
-    department: 'Executive Operations',
-    jobTitle: 'Senior Administrative Officer',
+    department: 'Administration',
+    jobTitle: 'System Administrator',
     isVerifiedGov: true,
     approvalStatus: 'approved'
   };
 
+  // Default workspace channels for instant availability
+  const DEFAULT_INITIAL_CHANNELS: Channel[] = [
+    {
+      id: 'chan_announcements',
+      name: 'announcements-gazettes',
+      topic: 'Official institutional directives, gazettes, and statutory notices',
+      description: 'Statutory announcements and directives for official institutional records.',
+      category: 'Organization',
+      isPrivate: false,
+      members: ['usr_sysadmin'],
+      unreadCount: 0,
+      isPinned: true
+    },
+    {
+      id: 'chan_deliberations',
+      name: 'executive-deliberations',
+      topic: 'Council deliberations, policy alignment, and administrative strategy',
+      description: 'High-level consultations and leadership deliberations.',
+      category: 'Departments',
+      isPrivate: false,
+      members: ['usr_sysadmin'],
+      unreadCount: 0
+    },
+    {
+      id: 'chan_compliance',
+      name: 'statutory-compliance',
+      topic: 'NDPA 2023 compliance, audit filings, and regulatory verification',
+      description: 'Verification channel for statutory compliance and data protection audits.',
+      category: 'Projects',
+      isPrivate: false,
+      members: ['usr_sysadmin'],
+      unreadCount: 0
+    },
+    {
+      id: 'chan_general',
+      name: 'general-operations',
+      topic: 'Cross-functional institutional workflows and daily operations',
+      description: 'Public operations workspace for all accredited officers.',
+      category: 'Organization',
+      isPrivate: false,
+      members: ['usr_sysadmin'],
+      unreadCount: 0
+    }
+  ];
+
   // Authentication State
   const [currentUser, setCurrentUser] = useState<Member>(DEFAULT_OFFICER);
+  const [firebaseAuthUser, setFirebaseAuthUser] = useState<any>(null);
   const [isAuthLoading, setIsAuthLoading] = useState<boolean>(false);
 
   // Organization settings
@@ -198,9 +245,10 @@ export default function App() {
   // Expandable / Collapsible Navigation Rail State (Icon-only vs Expanded)
   const [isNavExpanded, setIsNavExpanded] = useState<boolean>(() => {
     try {
-      return localStorage.getItem('worknest_nav_expanded') === 'true';
+      const stored = localStorage.getItem('worknest_nav_expanded');
+      return stored !== null ? stored === 'true' : true;
     } catch {
-      return false;
+      return true;
     }
   });
 
@@ -299,7 +347,7 @@ export default function App() {
   };
 
   // Real-time Workspace Data State
-  const [channels, setChannels] = useState<Channel[]>([]);
+  const [channels, setChannels] = useState<Channel[]>(DEFAULT_INITIAL_CHANNELS);
   const [directMessages, setDirectMessages] = useState<DirectMessage[]>([]);
   const [messages, setMessages] = useState<Record<string, Message[]>>({});
   const [files, setFiles] = useState<FileItem[]>([]);
@@ -310,7 +358,7 @@ export default function App() {
     { id: 'fld_hr', name: 'Public Service Executive Orders', fileCount: 0 }
   ]);
   const [emails, setEmails] = useState<EmailMessage[]>([]);
-  const [members, setMembers] = useState<Member[]>([]);
+  const [members, setMembers] = useState<Member[]>(() => Object.values(SAMPLE_TEAM_MEMBERS));
   const [events, setEvents] = useState<OrganizationEvent[]>([]);
   const [notifications, setNotifications] = useState<NotificationItem[]>([]);
   const [auditLogs, setAuditLogs] = useState<AuditLogEntry[]>([]);
@@ -320,8 +368,14 @@ export default function App() {
   // WORKNEST WORKFLOW-FIRST CORE ENGINE (WorkItems & Tasks)
   const [workItems, setWorkItems] = useState<WorkItem[]>(() => {
     try {
-      const saved = localStorage.getItem('worknest_work_items');
-      return saved ? JSON.parse(saved) : INITIAL_WORK_ITEMS;
+      // Clear legacy storage keys containing mock items
+      localStorage.removeItem('worknest_work_items');
+      const saved = localStorage.getItem('worknest_work_items_v3');
+      if (saved) {
+        const parsed: WorkItem[] = JSON.parse(saved);
+        return Array.isArray(parsed) ? parsed.filter(w => w.id !== 'work_website_launch' && w.id !== 'work_q4_financial' && w.id !== 'work_conference_planning') : [];
+      }
+      return INITIAL_WORK_ITEMS;
     } catch {
       return INITIAL_WORK_ITEMS;
     }
@@ -329,8 +383,14 @@ export default function App() {
 
   const [tasks, setTasks] = useState<TaskItem[]>(() => {
     try {
-      const saved = localStorage.getItem('worknest_tasks');
-      return saved ? JSON.parse(saved) : INITIAL_WORK_TASKS;
+      // Clear legacy storage keys containing mock tasks
+      localStorage.removeItem('worknest_tasks');
+      const saved = localStorage.getItem('worknest_tasks_v3');
+      if (saved) {
+        const parsed: TaskItem[] = JSON.parse(saved);
+        return Array.isArray(parsed) ? parsed.filter(t => !t.id?.startsWith('task_wl_') && !t.id?.startsWith('task_q4_') && !t.id?.startsWith('task_conf_')) : [];
+      }
+      return INITIAL_WORK_TASKS;
     } catch {
       return INITIAL_WORK_TASKS;
     }
@@ -341,7 +401,7 @@ export default function App() {
   // Persist workItems and tasks locally so changes are always reactive
   useEffect(() => {
     try {
-      localStorage.setItem('worknest_work_items', JSON.stringify(workItems));
+      localStorage.setItem('worknest_work_items_v3', JSON.stringify(workItems));
     } catch (e) {
       console.error('Failed to persist work items', e);
     }
@@ -349,7 +409,7 @@ export default function App() {
 
   useEffect(() => {
     try {
-      localStorage.setItem('worknest_tasks', JSON.stringify(tasks));
+      localStorage.setItem('worknest_tasks_v3', JSON.stringify(tasks));
     } catch (e) {
       console.error('Failed to persist tasks', e);
     }
@@ -472,7 +532,9 @@ export default function App() {
 
   // 1. Firebase Authentication State Listener
   useEffect(() => {
+    setIsAuthLoading(true);
     const unsubscribeAuth = onAuthStateChanged(auth, async (fbUser) => {
+      setFirebaseAuthUser(fbUser);
       if (fbUser) {
         try {
           const userDocRef = doc(db, 'users', fbUser.uid);
@@ -527,55 +589,68 @@ export default function App() {
     return () => unsubscribeAuth();
   }, []);
 
-  // 2. Real-Time Firestore Data Subscriptions
+  // 2. Real-Time Public Subscriptions (Accessible without requiring auth per firestore.rules)
   useEffect(() => {
-    if (!currentUser) return;
-
     // A. Organization Settings
     const unsubOrg = subscribeToOrganization(setOrganization);
+    // B. Approved Domains
+    const unsubDomains = subscribeToApprovedDomains(setApprovedDomains);
+    // C. Invitations
+    const unsubInvites = subscribeToInvitations(setInvitations);
 
-    // B. Channels
+    return () => {
+      unsubOrg();
+      unsubDomains();
+      unsubInvites();
+    };
+  }, []);
+
+  // 3. Real-Time Authenticated Firestore Subscriptions (Only attach if user is authenticated)
+  useEffect(() => {
+    if (!firebaseAuthUser) {
+      // In guest or local mode, maintain standard default channels & sample members
+      setChannels(prev => prev.length > 0 ? prev : DEFAULT_INITIAL_CHANNELS);
+      setMembers(prev => prev.length > 0 ? prev : Object.values(SAMPLE_TEAM_MEMBERS));
+      return;
+    }
+
+    // A. Channels
     const unsubChannels = subscribeToChannels((chList) => {
-      setChannels(chList);
+      setChannels(chList.length > 0 ? chList : DEFAULT_INITIAL_CHANNELS);
       if (chList.length > 0 && !activeChannelId) {
         setActiveChannelId(chList[0].id);
       }
     });
 
-    // C. Direct Messages
-    const unsubDMs = subscribeToDirectMessages(currentUser.id, (dmList) => {
+    // B. Direct Messages
+    const unsubDMs = subscribeToDirectMessages(firebaseAuthUser.uid, (dmList) => {
       setDirectMessages(dmList);
       if (dmList.length > 0 && !activeDMId) {
         setActiveDMId(dmList[0].id);
       }
     });
 
-    // D. Files & Cloud Storage Records
+    // C. Files & Cloud Storage Records
     const unsubFiles = subscribeToFiles(setFiles);
 
-    // E. Official Government Emails
+    // D. Official Government Emails
     const unsubEmails = subscribeToEmails(setEmails);
 
-    // F. Members Directory
-    const unsubMembers = subscribeToMembers(setMembers);
+    // E. Members Directory
+    const unsubMembers = subscribeToMembers((memberList) => {
+      setMembers(memberList.length > 0 ? memberList : Object.values(SAMPLE_TEAM_MEMBERS));
+    });
 
-    // G. Audit Logs (NDPA 2023)
+    // F. Audit Logs (NDPA 2023)
     const unsubLogs = subscribeToAuditLogs(setAuditLogs);
 
-    // H. Notifications
-    const unsubNotifs = subscribeToNotifications(currentUser.id, setNotifications);
+    // G. Notifications
+    const unsubNotifs = subscribeToNotifications(firebaseAuthUser.uid, setNotifications);
 
-    // I. Approved Domains
-    const unsubDomains = subscribeToApprovedDomains(setApprovedDomains);
-
-    // J. Invitations
-    const unsubInvites = subscribeToInvitations(setInvitations);
-
-    // K. Project Task Board Items
+    // H. Project Task Board Items
     const unsubTasks = subscribeToTasks(setTasks);
 
     return () => {
-      unsubOrg();
       unsubChannels();
       unsubDMs();
       unsubFiles();
@@ -583,17 +658,15 @@ export default function App() {
       unsubMembers();
       unsubLogs();
       unsubNotifs();
-      unsubDomains();
-      unsubInvites();
       unsubTasks();
     };
-  }, [currentUser]);
+  }, [firebaseAuthUser]);
 
-  // 3. Real-Time Conversation Messages Subscription
+  // 4. Real-Time Conversation Messages Subscription (Only attach when authenticated)
   const activeConversationId = activeSection === 'channels' ? activeChannelId : activeDMId;
 
   useEffect(() => {
-    if (!currentUser || !activeConversationId) return;
+    if (!firebaseAuthUser || !activeConversationId) return;
 
     const unsubMessages = subscribeToMessages(activeConversationId, (msgs) => {
       setMessages(prev => ({
@@ -603,7 +676,7 @@ export default function App() {
     });
 
     return () => unsubMessages();
-  }, [currentUser, activeConversationId]);
+  }, [firebaseAuthUser, activeConversationId]);
 
   // Helper: Append Audit Log to Firestore
   const logAction = async (action: string, target: string, details: string) => {
@@ -1052,115 +1125,120 @@ export default function App() {
   const totalUnreadDMs = directMessages.reduce((acc, dm) => acc + (dm.unreadCount || 0), 0);
   const totalUnreadEmails = emails.filter(e => !e.isRead).length;
 
+  // Unified dynamic badge metrics for single authoritative navigation
+  const navCounts = useMemo(() => ({
+    myTasks: tasks.filter(t => (t.assigneeIds?.includes(currentUser?.id || '') || t.assignees?.some(a => a.id === currentUser?.id)) && t.status !== 'done').length,
+    activeWork: workItems.filter(w => w.status !== 'completed').length,
+    unreadChannels: totalUnreadChannels,
+    unreadDMs: totalUnreadDMs,
+    unreadEmails: totalUnreadEmails,
+    activeMeetings: activeMeetingRoomId ? 1 : 0,
+    totalFiles: files.length
+  }), [tasks, currentUser?.id, workItems, totalUnreadChannels, totalUnreadDMs, totalUnreadEmails, activeMeetingRoomId, files.length]);
+
   return (
-    <div className="flex h-screen w-screen overflow-hidden bg-[#fafafa] dark:bg-[#0d0f12] text-stone-900 dark:text-stone-100">
-      
-      {/* Offline Status Banner */}
-      {!isConnected && (
-        <div className="absolute top-0 inset-x-0 z-50 bg-rose-600 text-white text-xs font-semibold px-4 py-1 flex items-center justify-center space-x-2 shadow-md">
-          <WifiOff className="w-3.5 h-3.5" />
-          <span>You are currently offline. Reconnecting to GovNet Gateway...</span>
-        </div>
-      )}
-
-      {/* 1. Global Navigation Rail */}
-      <NavigationRail
-        activeSection={activeSection}
-        onSelectSection={(section) => {
-          setActiveSection(section);
-          setIsMobileSidebarOpen(false);
-        }}
-        unreadChannelsCount={totalUnreadChannels}
-        unreadDMsCount={totalUnreadDMs}
-        unreadEmailsCount={totalUnreadEmails}
-        currentUser={currentUser}
-        organization={organization}
-        onOpenSearch={() => setIsSearchOpen(true)}
-        onOpenQuickActions={() => setIsQuickActionsOpen(true)}
-        onOpenChannelBrowser={() => setIsChannelBrowserOpen(true)}
-        onOpenNewChannel={() => setIsCreateChannelOpen(true)}
-        onOpenNewDM={() => setIsCreateDMOpen(true)}
-        onOpenComposeEmail={() => setIsComposeEmailOpen(true)}
-        onLogout={handleLogout}
-        onUpdateStatus={handleUpdateStatus}
-        theme={theme}
-        onToggleTheme={toggleTheme}
-        onChangeTheme={(newTheme) => setTheme(newTheme)}
-        isNavExpanded={isNavExpanded}
-        onToggleNavExpand={toggleNavExpand}
-        isSidebarCollapsed={isSidebarCollapsed}
-        onToggleSidebarCollapse={toggleSidebarCollapse}
-      />
-
-      {/* 2. Contextual Sidebar */}
-      <ContextualSidebar
-        activeSection={activeSection}
-        organization={organization}
-        channels={channels}
-        activeChannel={activeChannel}
-        activeChannelId={activeChannelId}
-        onSelectChannel={handleSelectChannel}
-        onOpenNewChannel={() => setIsCreateChannelOpen(true)}
-        onOpenCreateChannel={() => setIsCreateChannelOpen(true)}
-        onOpenChannelBrowser={() => setIsChannelBrowserOpen(true)}
-        favoriteChannelIds={favoriteChannelIds}
-        onToggleFavoriteChannel={toggleFavoriteChannel}
-        directMessages={directMessages}
-        activeDM={activeDM}
-        activeDMId={activeDMId}
-        onSelectDM={handleSelectDM}
-        onOpenNewDM={() => setIsCreateDMOpen(true)}
-        onOpenCreateDM={() => setIsCreateDMOpen(true)}
-        favoriteDMIds={favoriteDMIds}
-        onToggleFavoriteDM={toggleFavoriteDM}
-        tasks={tasks}
-        deliverables={deliverables}
-        activeTaskFilterTab={activeTaskFilterTab}
-        onSelectTaskFilterTab={setActiveTaskFilterTab}
-        activeTaskDeliverableId={activeTaskDeliverableId}
-        onSelectTaskDeliverableId={setActiveTaskDeliverableId}
-        activeTaskPriority={activeTaskPriority}
-        onSelectTaskPriority={setActiveTaskPriority}
-        onOpenCreateTask={() => {
-          setActiveSection('tasks');
-          setIsCreateTaskModalOpen(true);
-        }}
-        activeHomeTab={activeHomeTab}
-        onSelectHomeTab={setActiveHomeTab}
-        plugins={plugins}
-        activePluginCategory={activePluginCategory}
-        onSelectPluginCategory={setActivePluginCategory}
-        activeEmailFolder={activeMailFolder}
-        onSelectEmailFolder={(folder) => setActiveMailFolder(folder)}
-        onOpenComposeEmail={() => setIsComposeEmailOpen(true)}
-        unreadEmailsCount={totalUnreadEmails}
-        fileFolders={folders}
-        activeFileFilter={activeFileFilter}
-        onSelectFileFilter={(filter) => setActiveFileFilter(filter)}
-        onOpenUploadFile={() => setActiveSection('files')}
-        activeDepartmentFilter={activeDepartmentFilter}
-        onSelectDepartmentFilter={(dept) => setActiveDepartmentFilter(dept)}
-        members={members}
-        currentUser={currentUser}
-        activeSettingsTab={activeSettingsTab}
-        onSelectSettingsTab={(tab) => setActiveSettingsTab(tab)}
-        onOpenScheduleEvent={() => setActiveSection('calendar')}
-        onOpenStartMeeting={() => {
-          const newRoom = `chambers-${Date.now().toString(36)}`;
-          setActiveMeetingRoomId(newRoom);
-        }}
-        isSidebarCollapsed={isSidebarCollapsed}
-        onToggleSidebarCollapse={toggleSidebarCollapse}
-        isOpenMobile={isMobileSidebarOpen}
-        onCloseMobile={() => setIsMobileSidebarOpen(false)}
-        onNavigateToSection={(section) => setActiveSection(section)}
-      />
-
-      {/* 3. Main Operational Content Area */}
-      <div className="flex-1 flex flex-col h-full min-w-0 overflow-hidden bg-white dark:bg-[#14171c]">
-        
-        {/* Dynamic Views */}
-        <main className="flex-1 h-full overflow-hidden flex pb-16 md:pb-0">
+    <div className="relative w-screen h-screen overflow-hidden bg-white dark:bg-[#0B101B]">
+      <AppShell
+        banner={
+          !isConnected ? (
+            <div className="absolute top-0 inset-x-0 z-50 bg-rose-600 text-white text-xs font-semibold px-4 py-1 flex items-center justify-center space-x-2 shadow-md">
+              <WifiOff className="w-3.5 h-3.5" />
+              <span>You are currently offline. Reconnecting to GovNet Gateway...</span>
+            </div>
+          ) : null
+        }
+        sidebar={
+          <Sidebar
+            activeSection={activeSection}
+            activeTaskFilterTab={activeTaskFilterTab}
+            onSelectSection={(section, filterTab) => {
+              setActiveSection(section);
+              if (filterTab) {
+                setActiveTaskFilterTab(filterTab);
+              }
+              setIsMobileSidebarOpen(false);
+            }}
+            currentUser={currentUser}
+            organization={organization}
+            isCollapsed={isSidebarCollapsed}
+            onToggleCollapse={toggleSidebarCollapse}
+            isOpenMobile={isMobileSidebarOpen}
+            onCloseMobile={() => setIsMobileSidebarOpen(false)}
+            onOpenQuickActions={() => setIsQuickActionsOpen(true)}
+            counts={navCounts}
+            channels={channels}
+            activeChannel={activeChannel}
+            onSelectChannel={handleSelectChannel}
+            onOpenCreateChannel={() => setIsCreateChannelOpen(true)}
+            directMessages={directMessages}
+            activeDM={activeDM}
+            onSelectDM={handleSelectDM}
+            onOpenCreateDM={() => setIsCreateDMOpen(true)}
+            theme={theme}
+            onToggleTheme={toggleTheme}
+            onChangeTheme={(newTheme) => setTheme(newTheme)}
+            onUpdateStatus={handleUpdateStatus}
+            onLogout={handleLogout}
+          />
+        }
+        header={
+          !activeMeetingRoomId ? (
+            <TopHeader
+              organization={organization}
+              activeSection={activeSection}
+              activeChannel={activeChannel}
+              activeDM={activeDM}
+              activeTaskFilter={activeTaskFilterTab}
+              currentUser={currentUser}
+              notifications={notifications}
+              unreadNotifications={notifications.filter(n => !n.isRead)}
+              isConnected={isConnected}
+              theme={theme}
+              onToggleTheme={toggleTheme}
+              isSidebarCollapsed={isSidebarCollapsed}
+              onToggleSidebarCollapse={toggleSidebarCollapse}
+              onOpenSearch={() => setIsSearchOpen(true)}
+              onOpenQuickActions={() => setIsQuickActionsOpen(true)}
+              onToggleMobileSidebar={() => setIsMobileSidebarOpen(prev => !prev)}
+              isMobileMenuOpen={isMobileSidebarOpen}
+              onUpdateUserStatus={handleUpdateStatus}
+              onSelectNotification={(notif) => {
+                markNotificationRead(notif.id);
+              }}
+              onMarkAllNotificationsRead={async () => {
+                for (const n of notifications.filter(item => !item.isRead)) {
+                  await markNotificationRead(n.id);
+                }
+              }}
+              onLogout={handleLogout}
+              onSelectSection={(sec) => {
+                setActiveSection(sec);
+                setIsMobileSidebarOpen(false);
+              }}
+              unreadChannelsCount={totalUnreadChannels}
+              unreadDMsCount={totalUnreadDMs}
+              unreadEmailsCount={totalUnreadEmails}
+            />
+          ) : null
+        }
+        bottomNav={
+          <MobileBottomNav
+            activeSection={activeSection}
+            onSelectSection={(sec) => {
+              setActiveSection(sec);
+              setIsMobileSidebarOpen(false);
+            }}
+            onToggleSidebar={() => setIsMobileSidebarOpen(prev => !prev)}
+            unreadChannelsCount={totalUnreadChannels}
+            unreadDMsCount={totalUnreadDMs}
+            unreadEmailsCount={totalUnreadEmails}
+            activeMeetingCount={activeMeetingRoomId ? 1 : 0}
+            theme={theme}
+            onToggleTheme={toggleTheme}
+            onLogout={handleLogout}
+          />
+        }
+      >
           
           {/* ACTIVE VIDEO MEETING STAGE (Takes over workspace if in call) */}
           {activeMeetingRoomId ? (
@@ -1559,24 +1637,7 @@ export default function App() {
             </>
           )}
 
-        </main>
-      </div>
-
-      {/* Mobile Navigation Bar */}
-      <MobileBottomNav
-        activeSection={activeSection}
-        onSelectSection={(sec) => {
-          setActiveSection(sec);
-          setIsMobileSidebarOpen(false);
-        }}
-        onToggleSidebar={() => setIsMobileSidebarOpen(prev => !prev)}
-        unreadChannelsCount={totalUnreadChannels}
-        unreadDMsCount={totalUnreadDMs}
-        unreadEmailsCount={totalUnreadEmails}
-        theme={theme}
-        onToggleTheme={toggleTheme}
-        onLogout={handleLogout}
-      />
+      </AppShell>
 
       {/* 4. Global Search & Command Modal (Ctrl+K / Cmd+K) */}
       <GlobalSearchModal
@@ -1696,6 +1757,7 @@ export default function App() {
         onClose={() => setIsCreateWorkOpen(false)}
         currentUser={currentUser || Object.values(SAMPLE_TEAM_MEMBERS)[0]}
         members={members.length > 0 ? members : Object.values(SAMPLE_TEAM_MEMBERS)}
+        onCreateWorkItem={handleCreateWorkItem}
         onCreateWork={handleCreateWorkItem}
       />
 

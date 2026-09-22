@@ -59,7 +59,25 @@ export const firebaseConfig = {
   appId: sanitizeEnv(env.VITE_FIREBASE_APP_ID),
 };
 
-const databaseId = sanitizeEnv(env.VITE_FIREBASE_FIRESTORE_DATABASE_ID) || 'worknest';
+// Resolves valid Firestore database ID, strictly guarding against misconfigured Google Analytics measurement IDs (e.g. G-*)
+export const resolveDatabaseId = (rawVal?: string): string => {
+  const sanitized = sanitizeEnv(rawVal);
+  // An analytics measurement ID starts with 'G-' or 'UA-' and must never be passed as a Firestore database ID
+  if (!sanitized || sanitized.startsWith('G-') || sanitized.startsWith('UA-')) {
+    return 'worknest';
+  }
+  if (sanitized === '(default)') {
+    // In this specific Cloud project, '(default)' is not provisioned; 'worknest' is the named database
+    return 'worknest';
+  }
+  // Standard Firestore database IDs must be lowercase alphanumeric and hyphens
+  if (!/^[a-z][a-z0-9-]{2,61}[a-z0-9]$/.test(sanitized)) {
+    return 'worknest';
+  }
+  return sanitized;
+};
+
+const databaseId = resolveDatabaseId(env.VITE_FIREBASE_FIRESTORE_DATABASE_ID);
 
 // Valid configuration check: ensures an authentic non-empty API key is present
 export const isFirebaseConfigured = Boolean(
@@ -84,7 +102,6 @@ if (isFirebaseConfigured) {
     try {
       realDbInstance = initializeFirestore(realApp, {
         ignoreUndefinedProperties: true,
-        experimentalAutoDetectLongPolling: true
       }, databaseId);
     } catch {
       try {
@@ -669,7 +686,26 @@ export const onSnapshot = (
 ): (() => void) => {
   if (isFirebaseConfigured && realDbInstance) {
     try {
-      return realOnSnapshot(targetRef, onNext, onError);
+      return realOnSnapshot(
+        targetRef, 
+        (snapshot) => {
+          onNext(snapshot);
+        },
+        (error) => {
+          const errCode = (error as any)?.code || '';
+          if (errCode === 'unavailable' || errCode === 'permission-denied') {
+            console.warn(`Firestore onSnapshot [${errCode}]:`, (error as any)?.message || error);
+          }
+          if (onError) {
+            try {
+              onError(error);
+            } catch (handled) {
+              // Gracefully handle throw inside onError so it doesn't crash the async runtime
+              console.warn('Handled Firestore listener error notification:', handled);
+            }
+          }
+        }
+      );
     } catch (e) {
       console.warn('Falling back to local snapshot listener:', e);
     }

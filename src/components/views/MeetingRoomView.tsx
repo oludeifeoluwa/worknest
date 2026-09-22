@@ -41,6 +41,7 @@ import {
 } from '../../lib/webrtcService';
 import { 
   getMeetingById, 
+  createMeetingRoom,
   updateMeetingRoom, 
   endMeetingRoom, 
   subscribeToMeetingRoom,
@@ -119,7 +120,7 @@ export const MeetingRoomView: React.FC<MeetingRoomViewProps> = ({
     let isMounted = true;
 
     async function initRoom() {
-      const room = await getMeetingById(meetingId);
+      let room = await getMeetingById(meetingId);
       if (!isMounted) return;
 
       if (room) {
@@ -129,6 +130,32 @@ export const MeetingRoomView: React.FC<MeetingRoomViewProps> = ({
         } else {
           setWaitingRoomStatus('admitted');
         }
+      } else {
+        // Auto-create ad-hoc meeting in Firestore so all peers can discover, signal, and join
+        const autoRoom: MeetingRoom = {
+          id: meetingId,
+          title: 'WorkNest Video Deliberation',
+          description: 'Instant team collaboration and consultation chamber',
+          hostId: currentUser.id,
+          hostName: currentUser.name,
+          hostEmail: currentUser.email,
+          status: 'active',
+          scheduledStartTime: new Date().toISOString(),
+          actualStartTime: new Date().toISOString(),
+          isWaitingRoomEnabled: false,
+          isPrivate: false,
+          invitedUserIds: [],
+          activeParticipantsCount: 1,
+          createdAt: new Date().toISOString()
+        };
+        try {
+          await createMeetingRoom(autoRoom);
+          if (isMounted) setMeetingData(autoRoom);
+        } catch (err) {
+          console.warn('Could not auto-create room document, continuing in memory:', err);
+          if (isMounted) setMeetingData(autoRoom);
+        }
+        if (isMounted) setWaitingRoomStatus('admitted');
       }
 
       // Initialize Engine
@@ -270,15 +297,23 @@ export const MeetingRoomView: React.FC<MeetingRoomViewProps> = ({
     };
   }, [meetingId, currentUser.id, isInMeeting, waitingRoomStatus, activeSidePanel, onLeaveMeeting]);
 
-  // Attach local stream when joining meeting
+  // Attach local or preview stream whenever elements mount or video is toggled
   useEffect(() => {
-    if (isInMeeting && localVideoRef.current && engineRef.current) {
-      const stream = engineRef.current.getLocalStream();
-      if (stream) {
+    if (!engineRef.current) return;
+    const stream = engineRef.current.getLocalStream();
+    if (!stream) return;
+
+    if (!isInMeeting && previewVideoRef.current && !isVideoOff) {
+      if (previewVideoRef.current.srcObject !== stream) {
+        previewVideoRef.current.srcObject = stream;
+      }
+    }
+    if (isInMeeting && localVideoRef.current && !isVideoOff) {
+      if (localVideoRef.current.srcObject !== stream) {
         localVideoRef.current.srcObject = stream;
       }
     }
-  }, [isInMeeting, isVideoOff]);
+  }, [isInMeeting, isVideoOff, isScreenSharing]);
 
   // 3. User Actions
   const handleJoinMeeting = async () => {

@@ -37,6 +37,9 @@ function getInitials(name?: string): string {
 
 function getPalette(name?: string) {
   if (!name) return colorPalettes[0];
+  if (name.toLowerCase().includes('administrator') || name.toLowerCase().includes('admin')) {
+    return { bg: 'bg-[#007A5A] dark:bg-[#007A5A]', text: 'text-white' };
+  }
   let hash = 0;
   for (let i = 0; i < name.length; i++) {
     hash = name.charCodeAt(i) + ((hash << 5) - hash);
@@ -53,7 +56,7 @@ const sizeConfig = {
   },
   sm: {
     container: 'w-8 h-8 text-xs',
-    dot: 'w-2 h-2',
+    dot: 'w-2.5 h-2.5',
     rounded: 'rounded-lg',
   },
   md: {

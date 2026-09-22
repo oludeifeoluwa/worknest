@@ -20,7 +20,8 @@ import {
   Activity,
   Users,
   Award,
-  AlertCircle
+  AlertCircle,
+  Trash2
 } from 'lucide-react';
 import { WorkItem, TaskItem, Member, WorkEvidence, WorkItemStatus, TaskStatus } from '../types';
 import { UserAvatar } from './UserAvatar';
@@ -106,6 +107,17 @@ export const WorkItemDetailModal: React.FC<WorkItemDetailModalProps> = ({
   const blockedTasks = workItemTasks.filter(t => t.blockedReason || (t.status === 'todo' && t.tags?.includes('Blocked'))).length;
   const progressPercent = totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : workItem.progressPercentage;
 
+  // Task status distribution
+  const doneCount = completedTasks;
+  const blockedCount = workItemTasks.filter(t => t.status !== 'done' && (t.status === 'blocked' || !!t.blockedReason || t.tags?.includes('Blocked'))).length;
+  const inProgressCount = workItemTasks.filter(t => t.status !== 'done' && !t.blockedReason && !t.tags?.includes('Blocked') && (t.status === 'in_progress' || t.status === 'review')).length;
+  const todoCount = Math.max(0, totalTasks - doneCount - blockedCount - inProgressCount);
+
+  const todoPercent = totalTasks > 0 ? (todoCount / totalTasks) * 100 : 0;
+  const inProgressPercent = totalTasks > 0 ? (inProgressCount / totalTasks) * 100 : 0;
+  const blockedPercent = totalTasks > 0 ? (blockedCount / totalTasks) * 100 : 0;
+  const donePercent = totalTasks > 0 ? (doneCount / totalTasks) * 100 : 0;
+
   // Contributor accountability calculations
   const contributorStats = workItem.contributors.map(c => {
     const memberTasks = workItemTasks.filter(t => t.assigneeIds?.includes(c.id) || t.assignees?.some(a => a.id === c.id));
@@ -158,6 +170,11 @@ export const WorkItemDetailModal: React.FC<WorkItemDetailModalProps> = ({
     onFlagTaskBlocked(taskId, blockingReason.trim());
     setBlockingTaskId(null);
     setBlockingReason('');
+  };
+
+  const handleDeleteEvidence = (evidenceId: string) => {
+    const updatedEvidence = (workItem.evidence || []).filter(e => e.id !== evidenceId);
+    onUpdateWorkItem(workItem.id, { evidence: updatedEvidence });
   };
 
   const handleSignOffCompletion = () => {
@@ -419,6 +436,95 @@ export const WorkItemDetailModal: React.FC<WorkItemDetailModalProps> = ({
                     </div>
                   </div>
                 </form>
+              )}
+
+              {/* Task Status Distribution Progress Bar */}
+              {totalTasks > 0 && (
+                <div 
+                  id="task-distribution-card"
+                  className="p-3.5 sm:p-4 rounded-2xl border border-stone-200/90 dark:border-stone-800 bg-stone-50/80 dark:bg-stone-900/60 shadow-2xs space-y-2.5"
+                >
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 text-xs">
+                    <span className="font-bold text-stone-800 dark:text-stone-200 tracking-tight flex items-center gap-1.5">
+                      <ListTodo className="w-3.5 h-3.5 text-[#0062FF]" />
+                      <span>Task Distribution</span>
+                    </span>
+                    <span className="text-stone-500 dark:text-stone-400 font-mono text-[11px] sm:text-xs">
+                      {completedTasks} of {totalTasks} finished • {progressPercent}% completion
+                    </span>
+                  </div>
+
+                  {/* Subtle Multi-segment Progress Bar */}
+                  <div 
+                    id="task-distribution-progressbar"
+                    className="h-2 w-full bg-stone-200/80 dark:bg-stone-800 rounded-full overflow-hidden flex gap-0.5 p-0.5"
+                    role="progressbar"
+                    aria-label="Task Status Distribution"
+                    aria-valuenow={progressPercent}
+                    aria-valuemin={0}
+                    aria-valuemax={100}
+                  >
+                    {todoPercent > 0 && (
+                      <div 
+                        id="task-dist-bar-todo"
+                        style={{ width: `${todoPercent}%` }} 
+                        className="h-full bg-stone-400 dark:bg-stone-600 rounded-full transition-all duration-300" 
+                        title={`Todo: ${todoCount} (${Math.round(todoPercent)}%)`}
+                      />
+                    )}
+                    {inProgressPercent > 0 && (
+                      <div 
+                        id="task-dist-bar-inprogress"
+                        style={{ width: `${inProgressPercent}%` }} 
+                        className="h-full bg-blue-500 rounded-full transition-all duration-300" 
+                        title={`In Progress: ${inProgressCount} (${Math.round(inProgressPercent)}%)`}
+                      />
+                    )}
+                    {blockedPercent > 0 && (
+                      <div 
+                        id="task-dist-bar-blocked"
+                        style={{ width: `${blockedPercent}%` }} 
+                        className="h-full bg-rose-500 rounded-full transition-all duration-300" 
+                        title={`Blocked: ${blockedCount} (${Math.round(blockedPercent)}%)`}
+                      />
+                    )}
+                    {donePercent > 0 && (
+                      <div 
+                        id="task-dist-bar-done"
+                        style={{ width: `${donePercent}%` }} 
+                        className="h-full bg-emerald-500 rounded-full transition-all duration-300" 
+                        title={`Done: ${doneCount} (${Math.round(donePercent)}%)`}
+                      />
+                    )}
+                  </div>
+
+                  {/* Status Legend */}
+                  <div className="flex flex-wrap items-center gap-x-4 gap-y-1.5 pt-0.5 text-xs text-stone-600 dark:text-stone-400">
+                    <div className="flex items-center space-x-1.5" title={`${todoCount} tasks waiting to start`}>
+                      <span className="w-2 h-2 rounded-full bg-stone-400 dark:bg-stone-600 shrink-0" />
+                      <span className="font-medium text-stone-600 dark:text-stone-400">Todo:</span>
+                      <span className="font-mono text-stone-900 dark:text-stone-100 font-semibold">{todoCount}</span>
+                    </div>
+
+                    <div className="flex items-center space-x-1.5" title={`${inProgressCount} tasks currently underway`}>
+                      <span className="w-2 h-2 rounded-full bg-blue-500 shrink-0" />
+                      <span className="font-medium text-stone-600 dark:text-stone-400">In Progress:</span>
+                      <span className="font-mono text-stone-900 dark:text-stone-100 font-semibold">{inProgressCount}</span>
+                    </div>
+
+                    <div className="flex items-center space-x-1.5" title={`${blockedCount} tasks impeded by dependencies`}>
+                      <span className="w-2 h-2 rounded-full bg-rose-500 shrink-0" />
+                      <span className="font-medium text-stone-600 dark:text-stone-400">Blocked:</span>
+                      <span className="font-mono text-rose-600 dark:text-rose-400 font-bold">{blockedCount}</span>
+                    </div>
+
+                    <div className="flex items-center space-x-1.5" title={`${doneCount} tasks verified and finished`}>
+                      <span className="w-2 h-2 rounded-full bg-emerald-500 shrink-0" />
+                      <span className="font-medium text-stone-600 dark:text-stone-400">Done:</span>
+                      <span className="font-mono text-emerald-600 dark:text-emerald-400 font-bold">{doneCount}</span>
+                    </div>
+                  </div>
+                </div>
               )}
 
               {/* Tasks List */}
@@ -706,10 +812,20 @@ export const WorkItemDetailModal: React.FC<WorkItemDetailModalProps> = ({
                           </div>
                         </div>
 
-                        <span className="px-3 py-1.5 rounded-full text-xs font-bold bg-emerald-50 text-emerald-700 dark:bg-emerald-950/50 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800 shrink-0 flex items-center gap-1.5">
-                          <CheckCircle2 className="w-3.5 h-3.5" />
-                          Verified
-                        </span>
+                        <div className="flex items-center space-x-2 shrink-0">
+                          <span className="px-3 py-1.5 rounded-full text-xs font-bold bg-emerald-50 text-emerald-700 dark:bg-emerald-950/50 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800 flex items-center gap-1.5">
+                            <CheckCircle2 className="w-3.5 h-3.5" />
+                            Verified
+                          </span>
+                          <button
+                            type="button"
+                            onClick={() => handleDeleteEvidence(ev.id)}
+                            className="p-1.5 text-stone-400 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/40 rounded-lg transition-colors cursor-pointer"
+                            title="Delete evidence"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
                       </div>
                     </div>
                   ))
